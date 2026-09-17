@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pašnodarbinātā izdevumu pārbaude</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f3f4f6;color:#1f2937}.main{max-width:1100px;margin:auto;padding:32px 20px}h1{margin:0 0 8px}.subtitle{color:#6b7280;margin-bottom:24px;line-height:1.5}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 3px 10px rgba(0,0,0,.06);margin-bottom:18px}label{display:block;font-weight:700;margin-bottom:7px}select,input{width:100%;padding:11px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:15px;background:#fff}.field{margin-bottom:16px}.hint{color:#6b7280;font-size:13px;margin-top:5px;line-height:1.4}button{border:0;border-radius:8px;padding:12px 18px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer;font-size:15px}.result{display:none}.result.show{display:block}.result-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}.badge{padding:7px 10px;border-radius:999px;font-size:13px;font-weight:700}.ok{background:#dcfce7;color:#166534}.warn{background:#fef3c7;color:#92400e}.no{background:#fee2e2;color:#991b1b}.amount{font-size:32px;font-weight:800;margin:8px 0 2px}.muted{color:#6b7280}.reason{line-height:1.55;margin-top:16px}.rule-box{background:#f8fafc;border-left:4px solid #94a3b8;padding:12px 14px;margin-top:16px;line-height:1.5}.small{font-size:13px;color:#6b7280;line-height:1.5}.saved-list{width:100%;border-collapse:collapse;margin-top:10px}.saved-list th,.saved-list td{text-align:left;padding:9px 8px;border-bottom:1px solid #e5e7eb;font-size:14px}.saved-list th{background:#f8fafc}.secondary{background:#e5e7eb;color:#1f2937;margin-left:8px}@media(max-width:760px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="main">
+<h1>Vai šo izdevumu var attiecināt?</h1>
+<div class="subtitle">Beta rīks pašnodarbinātajiem Latvijā. Tas palīdz novērtēt, vai izdevums parasti ir saistīts ar saimniecisko darbību un kādu daļu no summas varētu attiecināt.</div>
+
+<div class="card">
+<div class="grid">
+<div class="field"><label for="profession">Nozare / profesija</label><select id="profession"><option value="it">IT / datorsistēmu tehniķis</option><option value="beauty">Frizieris / skaistumkopšana</option><option value="photo">Fotogrāfs / video</option><option value="trades">Meistars / remontdarbi</option><option value="consultant">Konsultants / freelanceris</option></select></div>
+<div class="field"><label for="category">Izdevuma kategorija</label><select id="category"></select></div>
+<div class="field"><label for="amount">Summa (€)</label><input id="amount" type="number" min="0" step="0.01" placeholder="Piem., 120.00"></div>
+<div class="field"><label for="businessUse">Darba lietojums (%)</label><input id="businessUse" type="number" min="0" max="100" step="1" value="100"><div class="hint">Ja pirkumu lieto arī privāti, norādi tikai darba daļu.</div></div>
+<div class="field"><label for="receipt">Ir čeks / rēķins?</label><select id="receipt"><option value="yes">Jā</option><option value="no">Nē</option></select></div>
+<div class="field" id="kmField" style="display:none;"><label>Degviela / personīgais auto</label><div class="grid"><div><input id="totalKm" type="number" min="0" step="1" placeholder="Kopējie km"><div class="hint">Kopējais nobraukums</div></div><div><input id="workKm" type="number" min="0" step="1" placeholder="Darba km"><div class="hint">Darba braucieni</div></div></div></div>
+</div>
+<button id="calculate">Pārbaudīt izdevumu</button>
+</div>
+
+<div id="result" class="card result">
+<div class="result-head"><div><div id="resultTitle" style="font-size:20px;font-weight:800;"></div><div id="deductibleAmount" class="amount"></div><div class="muted">aptuveni attiecināmā summa</div></div><div id="statusBadge" class="badge"></div></div>
+<div id="reason" class="reason"></div>
+<div id="ruleBox" class="rule-box"></div>
+<div style="margin-top:16px;"><button id="saveExpense">Saglabāt šo izdevumu</button></div>
+</div>
+
+<div class="card">
+<h2 style="margin-top:0;">Saglabātie izdevumi</h2>
+<div id="savedEmpty" class="small">Vēl nav saglabāts neviens izdevums. Beta versijā dati glabājas tikai šajā pārlūkā.</div>
+<div id="savedWrap" style="display:none;"><table class="saved-list"><thead><tr><th>Izdevums</th><th>Summa</th><th>Attiecināms</th><th>Statuss</th></tr></thead><tbody id="savedBody"></tbody></table><div style="margin-top:14px;"><strong>Kopā attiecināmie izdevumi: <span id="savedTotal">0,00 €</span></strong><button id="clearSaved" class="secondary">Notīrīt</button></div></div>
+</div>
+
+<div class="card small"><strong>Svarīgi:</strong> šis ir informatīvs beta rīks, nevis VID lēmums vai individuāla nodokļu konsultācija. Galvenais princips ir tas, vai izdevums ir saistīts ar saimnieciskās darbības ienākumu gūšanu un ir pamatots ar dokumentiem. Sarežģītos vai robežgadījumos jāpārbauda konkrētā situācija VID vai pie grāmatveža.</div>
+</div>
+
+<script>
+const categories={computer:"Dators / monitors / tehnika",software:"Programmatūra / licences / hostings",phone:"Telefons",internet:"Internets",fuel:"Degviela / personīgais auto",tools:"Darba instrumenti",materials:"Profesionālie materiāli",advertising:"Reklāma / mārketings",office:"Birojs / darba telpas",accounting:"Grāmatvedība",training:"Apmācības / kursi",workwear:"Darba / specapģērbs",normalClothes:"Parasts apģērbs",cosmetics:"Profesionālā kosmētika / kopšanas līdzekļi",hygiene:"Personīgā higiēna"};
+const rules={
+it:{computer:"yes",software:"yes",phone:"mixed",internet:"mixed",fuel:"mixed",tools:"yes",materials:"yes",advertising:"yes",office:"mixed",accounting:"yes",training:"mixed",workwear:"mixed",normalClothes:"no",cosmetics:"no",hygiene:"no"},
+beauty:{computer:"mixed",software:"mixed",phone:"mixed",internet:"mixed",fuel:"mixed",tools:"yes",materials:"yes",advertising:"yes",office:"mixed",accounting:"yes",training:"mixed",workwear:"mixed",normalClothes:"no",cosmetics:"yes",hygiene:"mixed"},
+photo:{computer:"yes",software:"yes",phone:"mixed",internet:"mixed",fuel:"mixed",tools:"yes",materials:"yes",advertising:"yes",office:"mixed",accounting:"yes",training:"mixed",workwear:"mixed",normalClothes:"no",cosmetics:"no",hygiene:"no"},
+trades:{computer:"mixed",software:"mixed",phone:"mixed",internet:"mixed",fuel:"mixed",tools:"yes",materials:"yes",advertising:"yes",office:"mixed",accounting:"yes",training:"mixed",workwear:"yes",normalClothes:"no",cosmetics:"no",hygiene:"no"},
+consultant:{computer:"yes",software:"yes",phone:"mixed",internet:"mixed",fuel:"mixed",tools:"mixed",materials:"yes",advertising:"yes",office:"mixed",accounting:"yes",training:"mixed",workwear:"mixed",normalClothes:"no",cosmetics:"no",hygiene:"no"}};
+const explanations={yes:"Šāda veida izdevums šai profesijai parasti ir loģiski saistīts ar saimniecisko darbību, ja tas tiešām tiek izmantots darbam un ir pirkuma dokuments.",mixed:"Šis var būt saimnieciskās darbības izdevums, bet bieži ir arī privāts lietojums. Attiecināma ir pamatota darba daļa, nevis automātiski visa summa.",no:"Šis izdevums šai profesijai parasti izskatās pēc personīga patēriņa un tam nav acīmredzamas saiknes ar konkrētās saimnieciskās darbības ienākumu gūšanu."};
+
+const categorySelect=document.getElementById("category");
+Object.entries(categories).forEach(([value,label])=>{const o=document.createElement("option");o.value=value;o.textContent=label;categorySelect.appendChild(o);});
+categorySelect.addEventListener("change",()=>{document.getElementById("kmField").style.display=categorySelect.value==="fuel"?"block":"none";});
+
+let lastResult=null;
+document.getElementById("calculate").addEventListener("click",calculate);
+
+function calculate(){
+const profession=document.getElementById("profession").value;
+const category=categorySelect.value;
+const amount=Number(document.getElementById("amount").value);
+const receipt=document.getElementById("receipt").value;
+let businessUse=Number(document.getElementById("businessUse").value);
+if(!amount||amount<=0){alert("Ievadi izdevuma summu.");return;}
+businessUse=Math.max(0,Math.min(100,businessUse));
+const rule=rules[profession][category];
+let deductiblePercent=0;
+let note=explanations[rule];
+
+if(rule==="yes"||rule==="mixed"){deductiblePercent=receipt==="yes"?businessUse:0;}
+if(rule==="no"){deductiblePercent=0;}
+
+if(category==="fuel"){
+const totalKm=Number(document.getElementById("totalKm").value);
+const workKm=Number(document.getElementById("workKm").value);
+if(totalKm>0&&workKm>=0){
+const kmPercent=Math.min((workKm/totalKm)*100,70);
+deductiblePercent=receipt==="yes"?kmPercent:0;
+note="Degvielai izmantota darba braucienu proporcija. Personīgā vieglā auto izmaksām šajā beta aprēķinā piemērots maksimums 70% no faktiskajām izmaksām.";
+}else{
+deductiblePercent=0;
+note="Degvielas aprēķinam ievadi kopējo nobraukumu un darba braucienu kilometrus.";
+}}
+
+const deductibleAmount=amount*deductiblePercent/100;
+let badgeText="",badgeClass="";
+if(rule==="yes"){badgeText="Parasti attiecināms";badgeClass="ok";}
+if(rule==="mixed"){badgeText="Atkarīgs no lietojuma";badgeClass="warn";}
+if(rule==="no"){badgeText="Parasti nav attiecināms";badgeClass="no";}
+if(receipt==="no"){note+=" Šajā beta versijā bez čeka/rēķina summa netiek pieskaitīta attiecināmajiem izdevumiem.";}
+
+document.getElementById("resultTitle").textContent=categories[category];
+document.getElementById("deductibleAmount").textContent=money(deductibleAmount);
+const badge=document.getElementById("statusBadge");badge.textContent=badgeText;badge.className="badge "+badgeClass;
+document.getElementById("reason").textContent=note;
+document.getElementById("ruleBox").innerHTML="<strong>Aprēķina princips:</strong><br>Izdevumos vērtē saistību ar saimniecisko darbību, faktisko darba lietojumu un pamatojošos dokumentus. Aprēķinā izmantotā darba daļa: <strong>"+deductiblePercent.toFixed(1).replace(".",",")+"%</strong>.";
+document.getElementById("result").classList.add("show");
+lastResult={category:categories[category],amount,deductibleAmount,status:badgeText};
+}
+
+document.getElementById("saveExpense").addEventListener("click",()=>{if(!lastResult)return;const saved=JSON.parse(localStorage.getItem("selfEmployedExpenses")||"[]");saved.push(lastResult);localStorage.setItem("selfEmployedExpenses",JSON.stringify(saved));renderSaved();});
+document.getElementById("clearSaved").addEventListener("click",()=>{localStorage.removeItem("selfEmployedExpenses");renderSaved();});
+
+function renderSaved(){
+const saved=JSON.parse(localStorage.getItem("selfEmployedExpenses")||"[]");
+const empty=document.getElementById("savedEmpty"),wrap=document.getElementById("savedWrap"),body=document.getElementById("savedBody");
+if(!saved.length){empty.style.display="block";wrap.style.display="none";return;}
+empty.style.display="none";wrap.style.display="block";body.innerHTML="";let total=0;
+saved.forEach(item=>{total+=Number(item.deductibleAmount);const row=document.createElement("tr");row.innerHTML=`<td>${escapeHtml(item.category)}</td><td>${money(item.amount)}</td><td>${money(item.deductibleAmount)}</td><td>${escapeHtml(item.status)}</td>`;body.appendChild(row);});
+document.getElementById("savedTotal").textContent=money(total);
+}
+
+function money(value){return Number(value).toLocaleString("lv-LV",{style:"currency",currency:"EUR",minimumFractionDigits:2,maximumFractionDigits:2});}
+function escapeHtml(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
+renderSaved();
+</script>
+</body>
+</html>
