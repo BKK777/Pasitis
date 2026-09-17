@@ -51,6 +51,15 @@ th{background:#f8fafc}
 .step-dot.active{background:#2563eb;color:#fff}
 .profile-chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:12px;font-weight:700;margin-right:6px;margin-bottom:6px}
 @media(max-width:850px){.app-shell{grid-template-columns:1fr}.sidebar{position:relative;height:auto;display:none}.sidebar.open{display:block}.mobile-menu{display:inline-block}.main{padding:18px 12px}}@media(max-width:700px){.grid,.summary{grid-template-columns:1fr}}
+
+.profession-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.profession-option{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;background:#fff;font-weight:600}
+.profession-option input{width:auto}
+.profession-info{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;margin-top:10px}
+.profession-info h3{margin:0 0 6px;font-size:16px}
+.profession-info ul{margin:8px 0 0 18px;padding:0}
+.required-note{font-size:12px;color:#991b1b;font-weight:700;margin-top:6px}
+@media(max-width:700px){.profession-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -67,14 +76,11 @@ th{background:#f8fafc}
 </aside>
 <div class="main">
 <button class="secondary mobile-menu" id="mobileMenu">☰ Izvēlne</button>
-
-
-
 <section class="page-section active" id="section-dashboard">
 <div class="topbar">
 <div>
 <h1>Pašnodarbinātā panelis</h1>
-<div class="subtitle">Beta v12 — salabota sadaļu struktūra</div>
+<div class="subtitle">Beta v13 — vairākas profesijas un obligāts profils</div>
 </div>
 <div style="min-width:220px;">
 <label for="monthFilter">Skatīt mēnesi</label>
@@ -128,7 +134,7 @@ th{background:#f8fafc}
 <div>
 <h2 style="margin-bottom:8px;">Biznesa profils</h2>
 <div class="smalltext" id="profileSummary">Profils vēl nav iestatīts.</div>
-</div>
+<div id="profileProfessionDescriptions" style="margin-top:16px;"></div></div>
 <button class="secondary" id="editProfile">Labot profilu</button>
 </div>
 </div>
@@ -254,7 +260,9 @@ th{background:#f8fafc}
 <option value="trades">Meistars / remontdarbi</option>
 <option value="consultant">Konsultants / freelanceris</option>
 </select>
-</div>
+<div class="notice" id="expenseProfessionGuidance" style="margin-top:8px;">
+  Izvēlies profesiju, lai redzētu tipiskos attiecināmos izdevumus.
+</div></div>
 <div class="field">
 <label for="category">Izdevuma kategorija</label>
 <select id="category"></select>
@@ -372,20 +380,10 @@ th{background:#f8fafc}
     </div>
 </div>
 </section></div>
-
-
-
-
-
-
 <!-- INCOME -->
-
 <!-- EXPENSE -->
-
 <!-- HISTORY -->
-
 </div>
-
 <div class="onboarding hidden" id="onboarding">
 <div class="onboarding-card">
 <button aria-label="Aizvērt" class="modal-close" id="closeOnboarding" title="Aizvērt" type="button">×</button>
@@ -400,21 +398,22 @@ th{background:#f8fafc}
 <label for="profileName">Vārds vai uzņēmuma nosaukums</label>
 <input id="profileName" placeholder="Piem., Nauris / NC IT" type="text"/>
 </div>
-<div class="field">
-<label for="profileProfession">Galvenā nozare / profesija</label>
-<select id="profileProfession">
-<option value="it">IT / datorsistēmu tehniķis</option>
-<option value="beauty">Frizieris / skaistumkopšana</option>
-<option value="photo">Fotogrāfs / video</option>
-<option value="trades">Meistars / remontdarbi</option>
-<option value="consultant">Konsultants / freelanceris</option>
-<option value="other">Cits</option>
-</select>
+<div class="field" id="professionMultiField">
+<label>Galvenā nozare / profesijas</label>
+<div class="hint" style="margin-bottom:8px;">Izvēlies vienu vai vairākas profesijas. Izdevumu sadaļā varēsi izmantot tikai šeit izvēlētās.</div>
+<div class="profession-grid" id="profileProfessionList">
+<label class="profession-option"><input type="checkbox" value="it"/> IT / datorsistēmu tehniķis</label>
+<label class="profession-option"><input type="checkbox" value="beauty"/> Frizieris / skaistumkopšana</label>
+<label class="profession-option"><input type="checkbox" value="photo"/> Fotogrāfs / video</label>
+<label class="profession-option"><input type="checkbox" value="trades"/> Meistars / remontdarbi</label>
+<label class="profession-option"><input type="checkbox" value="consultant"/> Konsultants / freelanceris</label>
+<label class="profession-option"><input type="checkbox" value="other"/> Cits</label>
+</div>
 </div>
 <div class="field hidden" id="profileOtherWrap">
-<label for="profileOther">Apraksti savu darbību</label>
+<label for="profileOther">Apraksti citu profesiju</label>
 <input id="profileOther" placeholder="Piem., tulks, treneris, dizainers" type="text"/>
-</div>
+<div class="hint">Ja nepieciešams, vari norādīt vairākas citas profesijas, atdalot ar komatu.</div></div>
 <div class="action-row">
 <button id="onboardingNext1" type="button">Tālāk</button>
 <button class="secondary" id="onboardingLater" type="button">Pabeigt vēlāk</button>
@@ -630,7 +629,7 @@ function escapeHtml(value){
 function updateCategoryAdvice(){
   const category=document.getElementById("category").value;
   const profession=document.getElementById("profession").value;
-  const rule=rules[profession][category];
+  const rule=(rules[profession]||rules.consultant)[category];
 
   const label=
     rule==="yes" ? "Parasti attiecināms" :
@@ -807,7 +806,7 @@ function calculateExpense(){
   }
 
   businessUse=Math.max(0,Math.min(100,businessUse));
-  const rule=rules[profession][category];
+  const rule=(rules[profession]||rules.consultant)[category];
   let percent=0;
   let note=explanations[rule];
 
@@ -1472,17 +1471,169 @@ function professionLabel(value){
   return map[value]||value||"Nav norādīts";
 }
 
+const professionExpenseInfo={
+  it:{
+    title:"IT / datorsistēmu tehniķis",
+    examples:[
+      "Dators, monitors, perifērija un darba instrumenti",
+      "Programmatūra, licences, hostings un mākoņpakalpojumi",
+      "Telefons un internets darba proporcijā",
+      "Degviela un auto izdevumi, ja brauc pie klientiem",
+      "Profesionālās apmācības un sertifikācija"
+    ]
+  },
+  beauty:{
+    title:"Frizieris / skaistumkopšana",
+    examples:[
+      "Profesionālā kosmētika un materiāli klientiem",
+      "Šķēres, fēns, instrumenti un aprīkojums",
+      "Salona noma un komunālie izdevumi darba daļā",
+      "Reklāma un klientu piesaistes izmaksas",
+      "Profesionālās apmācības"
+    ]
+  },
+  photo:{
+    title:"Fotogrāfs / video",
+    examples:[
+      "Kamera, objektīvi, gaismas un cits aprīkojums",
+      "Dators, datu glabāšana un rediģēšanas programmatūra",
+      "Studijas vai lokācijas noma",
+      "Degviela braucieniem uz filmēšanas vietām",
+      "Reklāma, portfolio un mājaslapa"
+    ]
+  },
+  trades:{
+    title:"Meistars / remontdarbi",
+    examples:[
+      "Darba instrumenti un aizsargaprīkojums",
+      "Materiāli un patēriņa preces darbu veikšanai",
+      "Degviela un transports uz objektu",
+      "Specapģērbs un darba drošības preces",
+      "Reklāma un darba telefona izmaksas"
+    ]
+  },
+  consultant:{
+    title:"Konsultants / freelanceris",
+    examples:[
+      "Dators, monitors un biroja tehnika",
+      "Programmatūra un abonementi",
+      "Telefons un internets darba proporcijā",
+      "Biroja vai kopstrādes telpas",
+      "Profesionālās apmācības un grāmatvedība"
+    ]
+  },
+  other:{
+    title:"Cita profesija",
+    examples:[
+      "Darba instrumenti un materiāli",
+      "Programmatūra un pakalpojumi, kas vajadzīgi darbam",
+      "Reklāma un klientu piesaiste",
+      "Darba telpas un sakari",
+      "Citi izdevumi, ja vari pamatot saistību ar ienākumu gūšanu"
+    ]
+  }
+};
+
+function getSelectedProfileProfessions(){
+  return Array.from(
+    document.querySelectorAll('#profileProfessionList input[type="checkbox"]:checked')
+  ).map(x=>x.value);
+}
+
+function renderProfessionDescriptions(){
+  const target=document.getElementById("profileProfessionDescriptions");
+  if(!target) return;
+
+  const p=data.profile||{};
+  const professions=Array.isArray(p.professions) ? p.professions : [];
+
+  if(!professions.length){
+    target.innerHTML="";
+    return;
+  }
+
+  target.innerHTML=
+    "<h3 style='margin-bottom:8px;'>Tipiski izdevumi pēc profesijas</h3>"+
+    professions.map(code=>{
+      const info=professionExpenseInfo[code]||professionExpenseInfo.other;
+      const title=code==="other" && p.otherProfession ? escapeHtml(p.otherProfession) : escapeHtml(info.title);
+      return `
+        <div class="profession-info">
+          <h3>${title}</h3>
+          <div class="smalltext">Šie ir tipiski piemēri. Konkrētais izdevums vienmēr jāspēj pamatot ar saimniecisko darbību.</div>
+          <ul>${info.examples.map(x=>`<li>${escapeHtml(x)}</li>`).join("")}</ul>
+        </div>
+      `;
+    }).join("");
+}
+
+function populateExpenseProfessions(){
+  const select=document.getElementById("profession");
+  if(!select) return;
+
+  const p=data.profile||{};
+  const professions=Array.isArray(p.professions) ? p.professions : [];
+
+  select.innerHTML="";
+
+  professions.forEach(code=>{
+    const option=document.createElement("option");
+    option.value=code;
+
+    if(code==="other" && p.otherProfession){
+      option.textContent=p.otherProfession;
+    }else{
+      option.textContent=professionLabel(code);
+    }
+
+    select.appendChild(option);
+  });
+
+  if(!professions.length){
+    const option=document.createElement("option");
+    option.value="";
+    option.textContent="Vispirms aizpildi biznesa profilu";
+    select.appendChild(option);
+  }
+
+  updateExpenseProfessionGuidance();
+}
+
+function updateExpenseProfessionGuidance(){
+  const target=document.getElementById("expenseProfessionGuidance");
+  const code=document.getElementById("profession")?.value;
+
+  if(!target) return;
+
+  if(!code){
+    target.innerHTML="<strong>Biznesa profils nav aizpildīts.</strong><br>Vispirms norādi vismaz vienu profesiju.";
+    return;
+  }
+
+  const p=data.profile||{};
+  const info=professionExpenseInfo[code]||professionExpenseInfo.other;
+  const title=code==="other" && p.otherProfession ? p.otherProfession : info.title;
+
+  target.innerHTML=
+    "<strong>"+escapeHtml(title)+" — tipiski izdevumi</strong><br>"+
+    info.examples.map(x=>"• "+escapeHtml(x)).join("<br>")+
+    "<div class='smalltext' style='margin-top:6px;'>Tie ir piemēri, nevis automātiska garantija, ka katrs pirkums ir attiecināms.</div>";
+}
+
 function renderProfileSummary(){
   const p=data.profile||{};
 
   if(!p.completed){
-    document.getElementById("profileSummary").textContent="Profils vēl nav iestatīts.";
+    document.getElementById("profileSummary").innerHTML=
+      "<strong>Profils nav aizpildīts.</strong><br><span class='required-note'>Biznesa profils ir obligāts, lai lietotu pārējo aplikāciju.</span>";
+    document.getElementById("profileProfessionDescriptions").innerHTML="";
     return;
   }
 
-  const profession=p.profession==="other" && p.otherProfession
-    ? p.otherProfession
-    : professionLabel(p.profession);
+  const professions=
+    Array.isArray(p.professions)
+      ? p.professions
+      : (p.profession ? [p.profession] : []);
 
   const workplaceMap={
     home:"No mājām",
@@ -1497,21 +1648,41 @@ function renderProfileSummary(){
     mixed:"Preces un pakalpojumi"
   };
 
+  const professionChips=professions.map(code=>{
+    const label=
+      code==="other" && p.otherProfession
+        ? p.otherProfession
+        : professionLabel(code);
+
+    return '<span class="profile-chip">'+escapeHtml(label)+'</span>';
+  }).join("");
+
   document.getElementById("profileSummary").innerHTML=
     "<strong>"+escapeHtml(p.name||"Bez nosaukuma")+"</strong><br>"+
-    '<span class="profile-chip">'+escapeHtml(profession)+'</span>'+
+    professionChips+
     '<span class="profile-chip">'+escapeHtml(activityMap[p.activityType]||"")+'</span>'+
     '<span class="profile-chip">'+escapeHtml(workplaceMap[p.workplace]||"")+'</span>'+
     (p.usesCar==="yes" ? '<span class="profile-chip">Izmanto auto darbam</span>' : "")+
     (p.otherJob==="yes" ? '<span class="profile-chip">Ir arī algots darbs</span>' : "")+
     (p.vat==="yes" ? '<span class="profile-chip">PVN maksātājs</span>' : "");
+
+  renderProfessionDescriptions();
 }
 
 function openOnboarding(edit=false){
   const p=data.profile||{};
 
   document.getElementById("profileName").value=p.name||"";
-  document.getElementById("profileProfession").value=p.profession||"it";
+
+  const savedProfessions=
+    Array.isArray(p.professions)
+      ? p.professions
+      : (p.profession ? [p.profession] : []);
+
+  document.querySelectorAll('#profileProfessionList input[type="checkbox"]').forEach(cb=>{
+    cb.checked=savedProfessions.includes(cb.value);
+  });
+
   document.getElementById("profileOther").value=p.otherProfession||"";
   document.getElementById("profileActivityType").value=p.activityType||"services";
   document.getElementById("profileWorkplace").value=p.workplace||"home";
@@ -1524,9 +1695,19 @@ function openOnboarding(edit=false){
   showOnboardingStep(1);
 
   document.getElementById("onboarding").classList.remove("hidden");
+
+  if(!data.profile || !data.profile.completed){
+    lockAppUntilProfile();
+  }else{
+    unlockAppAfterProfile();
+  }
 }
 
 function closeOnboarding(){
+  if(!data.profile || !data.profile.completed){
+    alert("Biznesa profils ir obligāts. Pabeidz profilu, lai turpinātu.");
+    return;
+  }
   document.getElementById("onboarding").classList.add("hidden");
 }
 
@@ -1539,7 +1720,7 @@ function showOnboardingStep(step){
 }
 
 function updateOtherProfessionVisibility(){
-  const isOther=document.getElementById("profileProfession").value==="other";
+  const isOther=getSelectedProfileProfessions().includes("other");
   document.getElementById("profileOtherWrap").classList.toggle("hidden",!isOther);
 }
 
@@ -1551,18 +1732,32 @@ function updateVatWarning(){
 }
 
 function finishProfile(){
-  const profession=document.getElementById("profileProfession").value;
+  const professions=getSelectedProfileProfessions();
   const otherProfession=document.getElementById("profileOther").value.trim();
+  const name=document.getElementById("profileName").value.trim();
 
-  if(profession==="other" && !otherProfession){
-    alert("Apraksti savu darbību.");
+  if(!name){
+    alert("Ievadi vārdu vai uzņēmuma nosaukumu.");
+    showOnboardingStep(1);
+    return;
+  }
+
+  if(!professions.length){
+    alert("Izvēlies vismaz vienu profesiju.");
+    showOnboardingStep(1);
+    return;
+  }
+
+  if(professions.includes("other") && !otherProfession){
+    alert("Apraksti citu profesiju.");
+    showOnboardingStep(1);
     return;
   }
 
   data.profile={
     completed:true,
-    name:document.getElementById("profileName").value.trim(),
-    profession,
+    name,
+    professions,
     otherProfession,
     activityType:document.getElementById("profileActivityType").value,
     workplace:document.getElementById("profileWorkplace").value,
@@ -1571,19 +1766,41 @@ function finishProfile(){
     vat:document.getElementById("profileVat").value
   };
 
-  if(profession!=="other" && document.getElementById("profession").querySelector('option[value="'+profession+'"]')){
-    document.getElementById("profession").value=profession;
-  }
-
   if(data.profile.otherJob==="yes"){
     document.getElementById("useMinimum").value="no";
   }
 
   saveData();
   renderProfileSummary();
+  renderProfessionDescriptions();
+  populateExpenseProfessions();
   updateCategoryAdvice();
   renderAll();
   closeOnboarding();
+}
+
+
+function lockAppUntilProfile(){
+  document.querySelectorAll(".nav-btn").forEach(btn=>{
+    const allowed=btn.dataset.section==="profile";
+    btn.disabled=!allowed;
+    btn.style.opacity=allowed ? "1" : ".45";
+    btn.style.cursor=allowed ? "pointer" : "not-allowed";
+  });
+
+  document.getElementById("closeOnboarding")?.classList.add("hidden");
+  document.getElementById("onboardingLater")?.classList.add("hidden");
+}
+
+function unlockAppAfterProfile(){
+  document.querySelectorAll(".nav-btn").forEach(btn=>{
+    btn.disabled=false;
+    btn.style.opacity="1";
+    btn.style.cursor="pointer";
+  });
+
+  document.getElementById("closeOnboarding")?.classList.remove("hidden");
+  document.getElementById("onboardingLater")?.classList.remove("hidden");
 }
 
 function maybeStartOnboarding(){
@@ -1591,22 +1808,15 @@ function maybeStartOnboarding(){
 
   if(!data.profile || !data.profile.completed){
     openOnboarding();
+    lockAppUntilProfile();
     return;
   }
 
+  unlockAppAfterProfile();
   renderProfileSummary();
+  populateExpenseProfessions();
 
-  const p=data.profile;
-
-  if(
-    p.profession &&
-    p.profession!=="other" &&
-    document.getElementById("profession")?.querySelector('option[value="'+p.profession+'"]')
-  ){
-    document.getElementById("profession").value=p.profession;
-  }
-
-  if(p.otherJob==="yes"){
+  if(data.profile.otherJob==="yes"){
     document.getElementById("useMinimum").value="no";
   }
 }
@@ -1715,6 +1925,10 @@ async function restoreDataFromFile(file){
       profile:restored.profile||{}
     };
 
+    if(data.profile.profession && !Array.isArray(data.profile.professions)){
+      data.profile.professions=[data.profile.profession];
+    }
+
     localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
     applySavedSettings();
     addRecurringForMonth(currentMonth());
@@ -1797,7 +2011,10 @@ document.getElementById("mobileMenu").addEventListener("click",()=>{
 });
 
 document.getElementById("category").addEventListener("change",updateKmField);
-document.getElementById("profession").addEventListener("change",updateCategoryAdvice);
+document.getElementById("profession").addEventListener("change",()=>{
+  updateCategoryAdvice();
+  updateExpenseProfessionGuidance();
+});
 
 document.getElementById("receiptFile").addEventListener("change",async(e)=>{
   const file=e.target.files[0];
@@ -1837,7 +2054,9 @@ document.getElementById("restoreFile").addEventListener("change",async(e)=>{
 });
 
 document.getElementById("editProfile")?.addEventListener("click",()=>openOnboarding(true));
-document.getElementById("profileProfession")?.addEventListener("change",updateOtherProfessionVisibility);
+document.querySelectorAll('#profileProfessionList input[type="checkbox"]').forEach(cb=>{
+  cb.addEventListener("change",updateOtherProfessionVisibility);
+});
 document.getElementById("profileVat")?.addEventListener("change",updateVatWarning);
 document.getElementById("closeOnboarding")?.addEventListener("click",closeOnboarding);
 document.getElementById("onboardingLater")?.addEventListener("click",closeOnboarding);
@@ -1907,10 +2126,12 @@ document.getElementById("clearAll").addEventListener("click",()=>{
 populateCategories();
 setDefaults();
 applySavedSettings();
+populateExpenseProfessions();
 updateKmField();
 updateCategoryAdvice();
 addRecurringForMonth(currentMonth());
 renderProfileSummary();
+renderProfessionDescriptions();
 renderAll();
 maybeStartOnboarding();
 </script>
