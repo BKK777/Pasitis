@@ -7,7 +7,7 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#f3f4f6;color:#1f2937}
-.main{max-width:1200px;margin:auto;padding:28px 18px}
+.app-shell{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100vh}.sidebar{background:#111827;color:#fff;padding:24px 16px;position:sticky;top:0;height:100vh}.sidebar h2{font-size:18px;margin:0 0 18px}.nav-btn{display:block;width:100%;text-align:left;background:transparent;color:#d1d5db;border:0;padding:11px 12px;border-radius:8px;margin-bottom:6px;font-weight:700;cursor:pointer}.nav-btn:hover,.nav-btn.active{background:#2563eb;color:#fff}.main{max-width:1200px;width:100%;margin:0 auto;padding:28px 22px}.page-section{display:none}.page-section.active{display:block}.mobile-menu{display:none;margin-bottom:14px}.onboarding-card{position:relative}.modal-close{position:absolute;right:16px;top:12px;background:transparent;color:#6b7280;font-size:28px;padding:4px 8px}.modal-close:hover{color:#111827}
 h1,h2,h3{margin-top:0}
 .subtitle{color:#6b7280;margin-bottom:22px}
 .topbar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
@@ -49,17 +49,31 @@ th{background:#f8fafc}
 .step-dot{padding:6px 10px;border-radius:999px;background:#e5e7eb;font-size:12px;font-weight:700}
 .step-dot.active{background:#2563eb;color:#fff}
 .profile-chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:12px;font-weight:700;margin-right:6px;margin-bottom:6px}
-@media(max-width:700px){.grid,.summary{grid-template-columns:1fr}.main{padding:18px 12px}}
+@media(max-width:850px){.app-shell{grid-template-columns:1fr}.sidebar{position:relative;height:auto;display:none}.sidebar.open{display:block}.mobile-menu{display:inline-block}.main{padding:18px 12px}}@media(max-width:700px){.grid,.summary{grid-template-columns:1fr}}
 </style>
 </head>
 
 <body>
-<div class="main">
+<div class="app-shell">
+<aside class="sidebar" id="sidebar">
+  <h2>Pašnodarbinātais</h2>
+  <button class="nav-btn active" data-section="dashboard">Pārskats</button>
+  <button class="nav-btn" data-section="profile">Biznesa profils</button>
+  <button class="nav-btn" data-section="tax">Nodokļu iestatījumi</button>
+  <button class="nav-btn" data-section="income">Pievienot ieņēmumu</button>
+  <button class="nav-btn" data-section="expense">Pievienot izdevumu</button>
+  <button class="nav-btn" data-section="history">Visi ieraksti</button>
+  <button class="nav-btn" data-section="backup">Eksports un rezerves kopija</button>
+</aside>
 
+<div class="main">
+<button id="mobileMenu" class="secondary mobile-menu">☰ Izvēlne</button>
+
+  <section id="section-dashboard" class="page-section active">
   <div class="topbar">
     <div>
       <h1>Pašnodarbinātā panelis</h1>
-      <div class="subtitle">Beta v8 — onboarding un biznesa profils</div>
+      <div class="subtitle">Beta v9 — sānu navigācija un salabots onboarding</div>
     </div>
 
     <div style="min-width:220px;">
@@ -68,6 +82,9 @@ th{background:#f8fafc}
     </div>
   </div>
 
+  </section>
+
+  <section id="section-profile" class="page-section">
   <div class="card">
     <div class="topbar">
       <div>
@@ -78,7 +95,11 @@ th{background:#f8fafc}
     </div>
   </div>
 
+  </section>
+
+  <section id="section-backup" class="page-section">
   <div class="card">
+    <h2>Eksports un rezerves kopija</h2>
     <div class="action-row">
       <button id="exportCsv">Eksportēt CSV</button>
       <button id="backupJson" class="secondary">Lejupielādēt rezerves kopiju</button>
@@ -90,6 +111,10 @@ th{background:#f8fafc}
     </div>
   </div>
 
+  </section>
+
+  <section id="section-tax" class="page-section">
+  <h1>Nodokļu iestatījumi</h1>
   <div class="summary">
     <div class="summary-card">
       <div class="summary-label">Ieņēmumi</div>
@@ -159,14 +184,16 @@ th{background:#f8fafc}
     VSAOI tiek rēķinātas no konkrētā mēneša peļņas. IIN šeit ir naudas rezerves novērtējums, nevis gala deklarācijas aprēķins, jo IIN Latvijā tiek noteikts gada griezumā un var būt atkarīgs arī no citiem ienākumiem un atvieglojumiem.
   </div>
 
-  <div class="tabs">
+  </section>
+
+  <div class="tabs hidden">
     <button class="tab active" data-tab="income">Ieņēmumi</button>
     <button class="tab" data-tab="expense">Izdevumi</button>
     <button class="tab" data-tab="history">Visi ieraksti</button>
   </div>
 
   <!-- INCOME -->
-  <div id="tab-income" class="tab-content">
+  <section id="section-income" class="page-section">
     <div class="card">
       <h2>Pievienot ieņēmumu</h2>
       <div class="grid">
@@ -195,10 +222,10 @@ th{background:#f8fafc}
         <button id="cancelIncomeEdit" class="secondary hidden">Atcelt rediģēšanu</button>
       </div>
     </div>
-  </div>
+  </section>
 
   <!-- EXPENSE -->
-  <div id="tab-expense" class="tab-content hidden">
+  <section id="section-expense" class="page-section">
     <div class="card">
       <h2>Pievienot izdevumu</h2>
 
@@ -301,10 +328,10 @@ th{background:#f8fafc}
         <button id="cancelEdit" class="secondary hidden">Atcelt rediģēšanu</button>
       </div>
     </div>
-  </div>
+  </section>
 
   <!-- HISTORY -->
-  <div id="tab-history" class="tab-content hidden">
+  <section id="section-history" class="page-section">
     <div class="card">
       <div class="topbar">
         <h2 style="margin:0;">Ieraksti izvēlētajā mēnesī</h2>
@@ -331,7 +358,7 @@ th{background:#f8fafc}
 
       <div id="historyEmpty" class="empty">Šajā mēnesī vēl nav ierakstu.</div>
     </div>
-  </div>
+  </section>
 
   <div class="card">
     <h2>Ceturkšņa nodokļu rezerve</h2>
@@ -404,6 +431,7 @@ th{background:#f8fafc}
     <strong>Beta:</strong> dati glabājas tikai šīs pārlūkprogrammas <code>localStorage</code>. Ja notīrīsi pārlūka datus vai izmantosi citu ierīci, ieraksti tur nebūs pieejami.
   </div>
 
+</div>
 </div>
 
 <script>
@@ -640,10 +668,7 @@ function startEditExpense(id){
   editingExpenseId=id;
   pendingReceiptFile=item.receiptAttachment||null;
 
-  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-  document.querySelectorAll(".tab-content").forEach(x=>x.classList.add("hidden"));
-  document.querySelector('.tab[data-tab="expense"]').classList.add("active");
-  document.getElementById("tab-expense").classList.remove("hidden");
+  showSection("expense");
 
   document.getElementById("expenseDate").value=item.date||todayISO();
   document.getElementById("profession").value=item.profession||"it";
@@ -867,10 +892,7 @@ function startEditIncome(id){
 
   editingIncomeId=id;
 
-  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-  document.querySelectorAll(".tab-content").forEach(x=>x.classList.add("hidden"));
-  document.querySelector('.tab[data-tab="income"]').classList.add("active");
-  document.getElementById("tab-income").classList.remove("hidden");
+  showSection("income");
 
   document.getElementById("incomeDate").value=item.date||todayISO();
   document.getElementById("incomeAmount").value=item.amount||"";
@@ -1687,13 +1709,29 @@ function renderAll(){
     );
 }
 
-document.querySelectorAll(".tab").forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
-    document.querySelectorAll(".tab-content").forEach(x=>x.classList.add("hidden"));
-    btn.classList.add("active");
-    document.getElementById("tab-"+btn.dataset.tab).classList.remove("hidden");
+function showSection(name){
+  document.querySelectorAll(".page-section").forEach(section=>{
+    section.classList.remove("active");
   });
+
+  const target=document.getElementById("section-"+name);
+  if(target) target.classList.add("active");
+
+  document.querySelectorAll(".nav-btn").forEach(btn=>{
+    btn.classList.toggle("active",btn.dataset.section===name);
+  });
+
+  if(window.innerWidth<=850){
+    document.getElementById("sidebar").classList.remove("open");
+  }
+}
+
+document.querySelectorAll(".nav-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>showSection(btn.dataset.section));
+});
+
+document.getElementById("mobileMenu").addEventListener("click",()=>{
+  document.getElementById("sidebar").classList.toggle("open");
 });
 
 document.getElementById("category").addEventListener("change",updateKmField);
@@ -1739,20 +1777,32 @@ document.getElementById("restoreFile").addEventListener("change",async(e)=>{
 document.getElementById("editProfile").addEventListener("click",()=>openOnboarding(true));
 document.getElementById("profileProfession").addEventListener("change",updateOtherProfessionVisibility);
 document.getElementById("profileVat").addEventListener("change",updateVatWarning);
+document.getElementById("closeOnboarding").addEventListener("click",closeOnboarding);
 
-document.getElementById("onboardingNext1").addEventListener("click",()=>{
+document.getElementById("onboardingNext1").addEventListener("click",(e)=>{
+  e.preventDefault();
   showOnboardingStep(2);
 });
-document.getElementById("onboardingBack2").addEventListener("click",()=>{
+document.getElementById("onboardingBack2").addEventListener("click",(e)=>{
+  e.preventDefault();
   showOnboardingStep(1);
 });
-document.getElementById("onboardingNext2").addEventListener("click",()=>{
+document.getElementById("onboardingNext2").addEventListener("click",(e)=>{
+  e.preventDefault();
   showOnboardingStep(3);
 });
-document.getElementById("onboardingBack3").addEventListener("click",()=>{
+document.getElementById("onboardingBack3").addEventListener("click",(e)=>{
+  e.preventDefault();
   showOnboardingStep(2);
 });
-document.getElementById("finishOnboarding").addEventListener("click",finishProfile);
+document.getElementById("finishOnboarding").addEventListener("click",(e)=>{
+  e.preventDefault();
+  finishProfile();
+});
+
+document.getElementById("onboarding").addEventListener("click",(e)=>{
+  if(e.target.id==="onboarding") closeOnboarding();
+});
 
 document.getElementById("monthFilter").addEventListener("change",()=>{
   addRecurringForMonth(currentMonth());
@@ -1794,6 +1844,7 @@ maybeStartOnboarding();
 
 <div id="onboarding" class="onboarding hidden">
   <div class="onboarding-card">
+    <button id="closeOnboarding" class="modal-close" title="Aizvērt">×</button>
     <div class="onboarding-steps">
       <span class="step-dot active" data-step-dot="1">1. Par tevi</span>
       <span class="step-dot" data-step-dot="2">2. Darbība</span>
@@ -1822,7 +1873,7 @@ maybeStartOnboarding();
         <input id="profileOther" type="text" placeholder="Piem., tulks, treneris, dizainers">
       </div>
       <div class="action-row">
-        <button id="onboardingNext1">Tālāk</button>
+        <button id="onboardingNext1" type="button">Tālāk</button>
       </div>
     </div>
 
@@ -1853,8 +1904,8 @@ maybeStartOnboarding();
         </select>
       </div>
       <div class="action-row">
-        <button id="onboardingBack2" class="secondary">Atpakaļ</button>
-        <button id="onboardingNext2">Tālāk</button>
+        <button id="onboardingBack2" type="button" class="secondary">Atpakaļ</button>
+        <button id="onboardingNext2" type="button">Tālāk</button>
       </div>
     </div>
 
@@ -1882,8 +1933,8 @@ maybeStartOnboarding();
       </div>
 
       <div class="action-row">
-        <button id="onboardingBack3" class="secondary">Atpakaļ</button>
-        <button id="finishOnboarding">Saglabāt profilu</button>
+        <button id="onboardingBack3" type="button" class="secondary">Atpakaļ</button>
+        <button id="finishOnboarding" type="button">Saglabāt profilu</button>
       </div>
     </div>
   </div>
