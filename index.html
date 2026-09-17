@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pašnodarbinātā panelis — Beta v2</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f4f6;color:#1f2937}
+.main{max-width:1200px;margin:auto;padding:28px 18px}
+h1,h2,h3{margin-top:0}
+.subtitle{color:#6b7280;margin-bottom:22px}
+.topbar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 3px 10px rgba(0,0,0,.06);margin-bottom:18px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.summary-card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 3px 10px rgba(0,0,0,.06)}
+.summary-label{font-size:13px;color:#6b7280;margin-bottom:8px}
+.summary-value{font-size:28px;font-weight:800}
+.summary-note{font-size:12px;color:#6b7280;margin-top:6px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.tab{border:1px solid #d1d5db;background:#fff;color:#1f2937;border-radius:8px;padding:10px 15px;font-weight:700;cursor:pointer}
+.tab.active{background:#2563eb;color:#fff;border-color:#2563eb}
+label{display:block;font-weight:700;margin-bottom:6px}
+input,select,textarea{width:100%;padding:10px 11px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;background:#fff}
+textarea{min-height:78px;resize:vertical}
+.field{margin-bottom:14px}
+button{border:0;border-radius:8px;padding:11px 16px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer}
+button.secondary{background:#e5e7eb;color:#1f2937}
+button.danger{background:#fee2e2;color:#991b1b}
+button.small{padding:6px 9px;font-size:12px}
+.hint,.smalltext{font-size:12px;color:#6b7280;line-height:1.45;margin-top:4px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th,td{padding:9px 8px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:14px;white-space:nowrap}
+th{background:#f8fafc}
+.right{text-align:right}
+.hidden{display:none!important}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700}
+.badge.ok{background:#dcfce7;color:#166534}
+.badge.warn{background:#fef3c7;color:#92400e}
+.badge.no{background:#fee2e2;color:#991b1b}
+.empty{padding:18px 0;color:#6b7280}
+.notice{background:#eff6ff;border-left:4px solid #3b82f6;padding:12px 14px;line-height:1.5;border-radius:8px}.action-row{display:flex;gap:8px;flex-wrap:wrap}.file-preview{margin-top:8px;font-size:12px;color:#475569}.file-preview img{max-width:180px;max-height:120px;border-radius:8px;border:1px solid #e5e7eb}.edit-note{font-size:12px;color:#92400e;margin:8px 0}
+@media(max-width:900px){.summary{grid-template-columns:repeat(2,1fr)}}
+.onboarding{position:fixed;inset:0;background:rgba(15,23,42,.6);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9999}
+.onboarding-card{background:#fff;border-radius:16px;max-width:720px;width:100%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.onboarding-steps{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.step-dot{padding:6px 10px;border-radius:999px;background:#e5e7eb;font-size:12px;font-weight:700}
+.step-dot.active{background:#2563eb;color:#fff}
+.profile-chip{display:inline-block;padding:6px 10px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:12px;font-weight:700;margin-right:6px;margin-bottom:6px}
+@media(max-width:700px){.grid,.summary{grid-template-columns:1fr}.main{padding:18px 12px}}
+</style>
+</head>
+
+<body>
+<div class="main">
+
+  <div class="topbar">
+    <div>
+      <h1>Pašnodarbinātā panelis</h1>
+      <div class="subtitle">Beta v8 — onboarding un biznesa profils</div>
+    </div>
+
+    <div style="min-width:220px;">
+      <label for="monthFilter">Skatīt mēnesi</label>
+      <input id="monthFilter" type="month">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="topbar">
+      <div>
+        <h2 style="margin-bottom:8px;">Biznesa profils</h2>
+        <div id="profileSummary" class="smalltext">Profils vēl nav iestatīts.</div>
+      </div>
+      <button id="editProfile" class="secondary">Labot profilu</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="action-row">
+      <button id="exportCsv">Eksportēt CSV</button>
+      <button id="backupJson" class="secondary">Lejupielādēt rezerves kopiju</button>
+      <button id="restoreJson" class="secondary">Atjaunot no rezerves kopijas</button>
+      <input id="restoreFile" type="file" accept=".json,application/json" class="hidden">
+    </div>
+    <div class="hint" style="margin-top:8px;">
+      CSV der Excel. Rezerves kopija saglabā visus ieņēmumus, izdevumus, iestatījumus un pievienotos dokumentus.
+    </div>
+  </div>
+
+  <div class="summary">
+    <div class="summary-card">
+      <div class="summary-label">Ieņēmumi</div>
+      <div id="sumIncome" class="summary-value">0,00 €</div>
+      <div class="summary-note">izvēlētajā mēnesī</div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-label">Attiecināmie izdevumi</div>
+      <div id="sumDeductible" class="summary-value">0,00 €</div>
+      <div class="summary-note">izvēlētajā mēnesī</div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-label">Peļņa pirms nodokļiem</div>
+      <div id="sumProfit" class="summary-value">0,00 €</div>
+      <div class="summary-note">ieņēmumi − attiecināmie izdevumi</div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-label">Aptuvenās VSAOI</div>
+      <div id="sumVsaoI" class="summary-value">0,00 €</div>
+      <div id="sumVsaoINote" class="summary-note">2026. gada likmes</div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-label">IIN rezerve</div>
+      <div id="sumIin" class="summary-value">0,00 €</div>
+      <div class="summary-note">orientējoši šim mēnesim</div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-label">Droši atstāt sev</div>
+      <div id="sumSafe" class="summary-value">0,00 €</div>
+      <div class="summary-note">peļņa − VSAOI − IIN rezerve</div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-label">Atlikt nodokļiem</div>
+      <div id="sumReserve" class="summary-value">0,00 €</div>
+      <div class="summary-note">VSAOI + IIN rezerve šim mēnesim</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Nodokļu iestatījumi</h2>
+    <div class="grid">
+      <div class="field">
+        <label for="socialBase">Pilno VSAOI bāze mēnesī (€)</label>
+        <input id="socialBase" type="number" min="780" step="1" value="780">
+        <div class="hint">Ja mēneša peļņa ir vismaz 780 €, pilnās VSAOI jāveic vismaz no 780 €. Vari izvēlēties lielāku bāzi.</div>
+      </div>
+
+      <div class="field">
+        <label for="useMinimum">Neapliekamais minimums šim aprēķinam</label>
+        <select id="useMinimum">
+          <option value="yes">Jā — 550 €/mēn.</option>
+          <option value="no">Nē</option>
+        </select>
+        <div class="hint">Ja neapliekamo minimumu jau izmanto citur (piem., algotā darbā), izvēlies “Nē”.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card notice">
+    <strong>Beta nodokļu aprēķins.</strong>
+    VSAOI tiek rēķinātas no konkrētā mēneša peļņas. IIN šeit ir naudas rezerves novērtējums, nevis gala deklarācijas aprēķins, jo IIN Latvijā tiek noteikts gada griezumā un var būt atkarīgs arī no citiem ienākumiem un atvieglojumiem.
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="income">Ieņēmumi</button>
+    <button class="tab" data-tab="expense">Izdevumi</button>
+    <button class="tab" data-tab="history">Visi ieraksti</button>
+  </div>
+
+  <!-- INCOME -->
+  <div id="tab-income" class="tab-content">
+    <div class="card">
+      <h2>Pievienot ieņēmumu</h2>
+      <div class="grid">
+        <div class="field">
+          <label for="incomeDate">Datums</label>
+          <input id="incomeDate" type="date">
+        </div>
+
+        <div class="field">
+          <label for="incomeAmount">Summa (€)</label>
+          <input id="incomeAmount" type="number" min="0" step="0.01" placeholder="Piem., 850.00">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="incomeDescription">Apraksts</label>
+        <input id="incomeDescription" type="text" placeholder="Piem., Mājaslapas izstrāde klientam">
+      </div>
+
+      <div id="incomeEditingNotice" class="edit-note hidden">
+        Tu rediģē esošu ieņēmumu. Saglabājot tas tiks aizstāts.
+      </div>
+
+      <div class="action-row">
+        <button id="addIncome">Saglabāt ieņēmumu</button>
+        <button id="cancelIncomeEdit" class="secondary hidden">Atcelt rediģēšanu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPENSE -->
+  <div id="tab-expense" class="tab-content hidden">
+    <div class="card">
+      <h2>Pievienot izdevumu</h2>
+
+      <div class="grid">
+        <div class="field">
+          <label for="expenseDate">Datums</label>
+          <input id="expenseDate" type="date">
+        </div>
+
+        <div class="field">
+          <label for="profession">Nozare / profesija</label>
+          <select id="profession">
+            <option value="it">IT / datorsistēmu tehniķis</option>
+            <option value="beauty">Frizieris / skaistumkopšana</option>
+            <option value="photo">Fotogrāfs / video</option>
+            <option value="trades">Meistars / remontdarbi</option>
+            <option value="consultant">Konsultants / freelanceris</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="category">Izdevuma kategorija</label>
+          <select id="category"></select>
+        </div>
+
+        <div class="field">
+          <label for="expenseAmount">Summa (€)</label>
+          <input id="expenseAmount" type="number" min="0" step="0.01" placeholder="Piem., 120.00">
+        </div>
+
+        <div class="field">
+          <label for="businessUse">Darba lietojums (%)</label>
+          <input id="businessUse" type="number" min="0" max="100" step="1" value="100">
+        </div>
+
+        <div class="field">
+          <label for="receipt">Ir čeks / rēķins?</label>
+          <select id="receipt">
+            <option value="yes">Jā</option>
+            <option value="no">Nē</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="kmField" class="field hidden">
+        <label>Degvielas aprēķins</label>
+        <div class="grid">
+          <div>
+            <input id="totalKm" type="number" min="0" step="1" placeholder="Kopējie km">
+            <div class="hint">Kopējais nobraukums</div>
+          </div>
+          <div>
+            <input id="workKm" type="number" min="0" step="1" placeholder="Darba km">
+            <div class="hint">Darba braucieni</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="expenseDescription">Pamatojums / apraksts</label>
+        <textarea id="expenseDescription" placeholder="Piem., brauciens pie klienta, darba programmatūra, profesionālais šampūns klientiem..."></textarea>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label for="recurring">Atkārtots izdevums</label>
+          <select id="recurring">
+            <option value="no">Nē</option>
+            <option value="monthly">Katru mēnesi</option>
+          </select>
+          <div class="hint">Piem., telefons, internets, programmatūra, noma.</div>
+        </div>
+
+        <div class="field">
+          <label for="receiptFile">Čeka / rēķina fails</label>
+          <input id="receiptFile" type="file" accept="image/*,.pdf">
+          <div class="hint">Beta versijā fails glabājas tikai šajā pārlūkā. Ieteicams zem 700 KB.</div>
+          <div id="receiptPreview" class="file-preview"></div>
+        </div>
+      </div>
+
+      <div id="categoryAdvice" class="notice" style="margin-bottom:14px;"></div>
+
+      <div id="editingNotice" class="edit-note hidden">
+        Tu rediģē esošu izdevumu. Saglabājot tas tiks aizstāts.
+      </div>
+
+      <div id="expensePreview" class="card hidden" style="background:#f8fafc;box-shadow:none;">
+        <div id="previewBadge"></div>
+        <div id="previewText" style="margin-top:10px;line-height:1.5;"></div>
+        <div style="margin-top:10px;">
+          Attiecināmā summa:
+          <strong id="previewDeductible"></strong>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button id="checkExpense">Pārbaudīt</button>
+        <button id="saveExpense" class="secondary" disabled>Saglabāt izdevumu</button>
+        <button id="cancelEdit" class="secondary hidden">Atcelt rediģēšanu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div id="tab-history" class="tab-content hidden">
+    <div class="card">
+      <div class="topbar">
+        <h2 style="margin:0;">Ieraksti izvēlētajā mēnesī</h2>
+        <button id="clearAll" class="danger">Dzēst visus datus</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Datums</th>
+              <th>Tips</th>
+              <th>Apraksts</th>
+              <th class="right">Summa</th>
+              <th class="right">Attiecināms</th>
+              <th>Atkārtojas</th>
+              <th>Dokuments</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+
+      <div id="historyEmpty" class="empty">Šajā mēnesī vēl nav ierakstu.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Ceturkšņa nodokļu rezerve</h2>
+
+    <div class="grid">
+      <div>
+        <div class="summary-label">VSAOI par izvēlēto ceturksni</div>
+        <div id="quarterVsao" class="summary-value">0,00 €</div>
+        <div class="summary-note">summa no šajā lietotnē ievadītajiem datiem</div>
+      </div>
+
+      <div>
+        <div class="summary-label">Kopējā nodokļu rezerve ceturksnim</div>
+        <div id="quarterReserve" class="summary-value">0,00 €</div>
+        <div class="summary-note">VSAOI + orientējošā IIN rezerve</div>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:18px;">
+      <label for="alreadyReserved">Cik jau esi atlicis nodokļiem (€)</label>
+      <input id="alreadyReserved" type="number" min="0" step="0.01" value="0">
+      <div class="hint">Ja naudu turi atsevišķā nodokļu kontā/apakškontā, ievadi šeit šī ceturkšņa rezervi.</div>
+    </div>
+
+    <div class="notice" style="margin-top:12px;">
+      Vēl ieteicams atlikt: <strong id="reserveShortfall">0,00 €</strong>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Termiņi</h2>
+
+    <div class="grid">
+      <div>
+        <div class="summary-label">Nākamais pašnodarbinātā ziņojums</div>
+        <div id="nextReportDate" style="font-size:22px;font-weight:800;"></div>
+        <div id="nextReportText" class="smalltext"></div>
+      </div>
+
+      <div>
+        <div class="summary-label">Nākamā VSAOI samaksa</div>
+        <div id="nextPaymentDate" style="font-size:22px;font-weight:800;"></div>
+        <div id="nextPaymentText" class="smalltext"></div>
+      </div>
+    </div>
+
+    <div class="rule-box">
+      <strong>Regulārie termiņi:</strong>
+      pašnodarbinātā ziņojums līdz 17. janvārim, 17. aprīlim, 17. jūlijam un 17. oktobrim;
+      VSAOI samaksa līdz attiecīgā mēneša 23. datumam.
+      Gada ienākumu deklarācija saimnieciskās darbības veicējam parasti jāiesniedz no 1. marta līdz 1. jūnijam, un aprēķinātais IIN jāsamaksā līdz 23. jūnijam.
+      Ja gada ienākumi pārsniedz 105 300 €, termiņi ir vēlāk.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Gada nodokļu orientieris</h2>
+    <div class="grid">
+      <div>
+        <div class="summary-label">Aptuvenais IIN uzkrājums ievadītajiem gada datiem</div>
+        <div id="yearIin" class="summary-value">0,00 €</div>
+      </div>
+      <div class="smalltext">
+        Šis rādītājs summē šajā aplikācijā ievadīto gada peļņu un VSAOI. Gala IIN jānosaka gada deklarācijā EDS, īpaši ja ir alga, citi ienākumi, apgādājamie vai citi atvieglojumi.
+      </div>
+    </div>
+  </div>
+
+  <div class="card smalltext">
+    <strong>Beta:</strong> dati glabājas tikai šīs pārlūkprogrammas <code>localStorage</code>. Ja notīrīsi pārlūka datus vai izmantosi citu ierīci, ieraksti tur nebūs pieejami.
+  </div>
+
+</div>
+
+<script>
+const STORAGE_KEY = "selfEmployedBetaV7";
+
+/*
+2026 nodokļu konstantes:
+- minimālā pilno VSAOI bāze: 780 €
+- pašnodarbinātā VSAOI likme: 31,07 %
+- pensiju iemaksa no atlikušās peļņas: 10 %
+- IIN: 25,5 % līdz 105 300 € gadā, 33 % virs tā
+- neapliekamais minimums: 550 €/mēn.
+*/
+const TAX = {
+  minSocialBase: 780,
+  fullVsaoRate: 0.3107,
+  pensionRate: 0.10,
+  iinRate1: 0.255,
+  iinRate2: 0.33,
+  iinThreshold: 105300,
+  monthlyNonTaxable: 550
+};
+
+const categories = {
+  computer:"Dators / monitors / tehnika",
+  software:"Programmatūra / licences / hostings",
+  phone:"Telefons",
+  internet:"Internets",
+  fuel:"Degviela / personīgais auto",
+  tools:"Darba instrumenti",
+  materials:"Profesionālie materiāli",
+  advertising:"Reklāma / mārketings",
+  office:"Birojs / darba telpas",
+  accounting:"Grāmatvedība",
+  training:"Apmācības / kursi",
+  workwear:"Darba / specapģērbs",
+  normalClothes:"Parasts apģērbs",
+  cosmetics:"Profesionālā kosmētika / kopšanas līdzekļi",
+  hygiene:"Personīgā higiēna"
+};
+
+const rules = {
+  it:{computer:"yes",software:"yes",phone:"mixed",internet:"mixed",fuel:"mixed",tools:"yes",materials:"yes",advertising:"yes",office:"mixed",accounting:"yes",training:"mixed",workwear:"mixed",normalClothes:"no",cosmetics:"no",hygiene:"no"},
+  beauty:{computer:"mixed",software:"mixed",phone:"mixed",internet:"mixed",fuel:"mixed",tools:"yes",materials:"yes",advertising:"yes",office:"mixed",accounting:"yes",training:"mixed",workwear:"mixed",normalClothes:"no",cosmetics:"yes",hygiene:"mixed"},
+  photo:{computer:"yes",software:"yes",phone:"mixed",internet:"mixed",fuel:"mixed",tools:"yes",materials:"yes",advertising:"yes",office:"mixed",accounting:"yes",training:"mixed",workwear:"mixed",normalClothes:"no",cosmetics:"no",hygiene:"no"},
+  trades:{computer:"mixed",software:"mixed",phone:"mixed",internet:"mixed",fuel:"mixed",tools:"yes",materials:"yes",advertising:"yes",office:"mixed",accounting:"yes",training:"mixed",workwear:"yes",normalClothes:"no",cosmetics:"no",hygiene:"no"},
+  consultant:{computer:"yes",software:"yes",phone:"mixed",internet:"mixed",fuel:"mixed",tools:"mixed",materials:"yes",advertising:"yes",office:"mixed",accounting:"yes",training:"mixed",workwear:"mixed",normalClothes:"no",cosmetics:"no",hygiene:"no"}
+};
+
+const explanations = {
+  yes:"Parasti attiecināms, ja izdevums tiešām izmantots saimnieciskajā darbībā un ir pamatojošs dokuments.",
+  mixed:"Var būt attiecināms, bet jānorāda pamatota darba lietojuma proporcija.",
+  no:"Parasti nav attiecināms, jo izskatās pēc personīga patēriņa vai nav skaidras saistības ar šo saimniecisko darbību."
+};
+const categoryAdviceMap = {
+  computer:"Dators un tehnika parasti ir attiecināmi, ja tos izmanto darbam. Ja izmanto arī privāti, norādi saprātīgu darba proporciju.",
+  software:"Programmatūra, licences un hostings parasti ir attiecināmi, ja tie vajadzīgi pakalpojuma sniegšanai vai biznesa darbībai.",
+  phone:"Telefons bieži ir jaukta lietojuma izdevums. Norādi darba lietojuma proporciju.",
+  internet:"Internets bieži ir jaukta lietojuma izdevums. Norādi darba lietojuma proporciju.",
+  fuel:"Degvielai personīgajam auto vajadzīga darba braucienu uzskaite. Beta aprēķins izmanto darba km proporciju ar 70% maksimumu.",
+  tools:"Darba instrumenti parasti ir attiecināmi, ja tie tieši vajadzīgi profesionālajai darbībai.",
+  materials:"Materiāli, ko patērē klientu apkalpošanai vai darbu veikšanai, parasti ir attiecināmi.",
+  advertising:"Reklāma un mārketings parasti ir attiecināmi, ja tie saistīti ar klientu piesaisti.",
+  office:"Biroja vai darba telpu izmaksas var būt attiecināmas. Mājas birojam parasti jānosaka pamatota proporcija.",
+  accounting:"Grāmatvedības pakalpojumi saimnieciskajai darbībai parasti ir attiecināmi.",
+  training:"Apmācībām jābūt saistītām ar esošo saimniecisko darbību vai profesionālo prasmju uzturēšanu.",
+  workwear:"Specapģērbs vai aizsargapģērbs var būt attiecināms. Ikdienas apģērbs parasti nav.",
+  normalClothes:"Ikdienas apģērbs parasti ir personīgs izdevums pat tad, ja to velk darbā.",
+  cosmetics:"Profesionālā kosmētika ir attiecināma, ja tā tiek izmantota klientiem vai pakalpojuma sniegšanai.",
+  hygiene:"Personīgā higiēna parasti nav biznesa izdevums; profesionāli patēriņa līdzekļi jāvērtē pēc faktiskā lietojuma."
+};
+
+let data = loadData();
+let pendingExpense = null;
+let editingExpenseId = null;
+let editingIncomeId = null;
+let pendingReceiptFile = null;
+
+function loadData(){
+  try{
+    const loaded=JSON.parse(localStorage.getItem(STORAGE_KEY));
+
+    if(loaded){
+      return {
+        income:Array.isArray(loaded.income)?loaded.income:[],
+        expenses:Array.isArray(loaded.expenses)?loaded.expenses:[],
+        settings:loaded.settings||{},
+        profile:loaded.profile||{}
+      };
+    }
+
+    // Mēģina paņemt datus no iepriekšējās beta versijas
+    const old=JSON.parse(localStorage.getItem("selfEmployedBetaV6"));
+
+    if(old){
+      return {
+        income:Array.isArray(old.income)?old.income:[],
+        expenses:Array.isArray(old.expenses)?old.expenses:[],
+        settings:old.settings||{},
+        profile:old.profile||{}
+      };
+    }
+
+    return {income:[],expenses:[],settings:{},profile:{}};
+
+  }catch(e){
+    return {income:[],expenses:[],settings:{},profile:{}};
+  }
+}
+
+function saveData(){
+  data.settings={
+    socialBase:Number(document.getElementById("socialBase")?.value||780),
+    useMinimum:document.getElementById("useMinimum")?.value||"yes",
+    alreadyReserved:Number(document.getElementById("alreadyReserved")?.value||0)
+  };
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function money(v){
+  return Number(v||0).toLocaleString("lv-LV",{style:"currency",currency:"EUR",minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function monthKey(date){
+  return String(date||"").slice(0,7);
+}
+
+function currentMonth(){
+  return document.getElementById("monthFilter").value;
+}
+
+function todayISO(){
+  return new Date().toISOString().slice(0,10);
+}
+
+function currentMonthISO(){
+  return new Date().toISOString().slice(0,7);
+}
+
+function escapeHtml(value){
+  return String(value??"")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+
+function updateCategoryAdvice(){
+  const category=document.getElementById("category").value;
+  const profession=document.getElementById("profession").value;
+  const rule=rules[profession][category];
+
+  const label=
+    rule==="yes" ? "Parasti attiecināms" :
+    rule==="mixed" ? "Atkarīgs no lietojuma" :
+    "Parasti nav attiecināms";
+
+  document.getElementById("categoryAdvice").innerHTML=
+    "<strong>"+label+"</strong><br>"+escapeHtml(categoryAdviceMap[category]||"");
+}
+
+function renderReceiptPreview(receipt){
+  const el=document.getElementById("receiptPreview");
+
+  if(!receipt){
+    el.innerHTML="";
+    return;
+  }
+
+  if(receipt.type && receipt.type.startsWith("image/")){
+    el.innerHTML=
+      "<div>"+escapeHtml(receipt.name)+"</div>"+
+      '<img src="'+receipt.dataUrl+'" alt="Dokumenta priekšskatījums">';
+  }else{
+    el.textContent=receipt.name || "Pievienots dokuments";
+  }
+}
+
+function readReceiptFile(file){
+  return new Promise((resolve,reject)=>{
+    if(!file){
+      resolve(null);
+      return;
+    }
+
+    if(file.size > 700*1024){
+      reject(new Error("Fails ir lielāks par 700 KB."));
+      return;
+    }
+
+    const reader=new FileReader();
+
+    reader.onload=()=>{
+      resolve({
+        name:file.name,
+        type:file.type,
+        dataUrl:reader.result
+      });
+    };
+
+    reader.onerror=()=>reject(new Error("Neizdevās nolasīt failu."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function resetExpenseForm(){
+  pendingExpense=null;
+  editingExpenseId=null;
+  pendingReceiptFile=null;
+
+  document.getElementById("expenseAmount").value="";
+  document.getElementById("expenseDescription").value="";
+  document.getElementById("businessUse").value="100";
+  document.getElementById("receipt").value="yes";
+  document.getElementById("recurring").value="no";
+  document.getElementById("receiptFile").value="";
+  document.getElementById("receiptPreview").innerHTML="";
+  document.getElementById("totalKm").value="";
+  document.getElementById("workKm").value="";
+
+  document.getElementById("expensePreview").classList.add("hidden");
+  document.getElementById("saveExpense").disabled=true;
+  document.getElementById("editingNotice").classList.add("hidden");
+  document.getElementById("cancelEdit").classList.add("hidden");
+}
+
+function startEditExpense(id){
+  const item=data.expenses.find(x=>x.id===id);
+  if(!item) return;
+
+  editingExpenseId=id;
+  pendingReceiptFile=item.receiptAttachment||null;
+
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".tab-content").forEach(x=>x.classList.add("hidden"));
+  document.querySelector('.tab[data-tab="expense"]').classList.add("active");
+  document.getElementById("tab-expense").classList.remove("hidden");
+
+  document.getElementById("expenseDate").value=item.date||todayISO();
+  document.getElementById("profession").value=item.profession||"it";
+  document.getElementById("category").value=item.category||"computer";
+  document.getElementById("expenseAmount").value=item.amount||"";
+  document.getElementById("businessUse").value=item.businessUse??100;
+  document.getElementById("receipt").value=item.receipt||"yes";
+  document.getElementById("expenseDescription").value=item.description||"";
+  document.getElementById("recurring").value=item.recurring||"no";
+  document.getElementById("totalKm").value=item.totalKm||"";
+  document.getElementById("workKm").value=item.workKm||"";
+
+  renderReceiptPreview(pendingReceiptFile);
+  updateKmField();
+  updateCategoryAdvice();
+
+  document.getElementById("editingNotice").classList.remove("hidden");
+  document.getElementById("cancelEdit").classList.remove("hidden");
+
+  calculateExpense();
+}
+
+function addRecurringForMonth(month){
+  if(!month) return;
+
+  const templates=
+    data.expenses.filter(x=>x.recurring==="monthly" && x.isRecurringTemplate===true);
+
+  const existingSourceIds=
+    new Set(
+      data.expenses
+        .filter(x=>monthKey(x.date)===month)
+        .map(x=>x.recurringSourceId)
+        .filter(Boolean)
+    );
+
+  templates.forEach(template=>{
+    const sourceId=template.recurringSourceId||template.id;
+
+    if(existingSourceIds.has(sourceId)) return;
+    if(monthKey(template.date)>=month) return;
+
+    const day=(template.date||"").slice(8,10)||"01";
+
+    const clone={
+      ...template,
+      id:Date.now()+"r"+Math.random().toString(36).slice(2,7),
+      date:month+"-"+day,
+      recurringSourceId:sourceId,
+      isRecurringTemplate:false
+    };
+
+    data.expenses.push(clone);
+  });
+
+  saveData();
+}
+
+function populateCategories(){
+  const select = document.getElementById("category");
+  select.innerHTML="";
+  Object.entries(categories).forEach(([value,label])=>{
+    const o=document.createElement("option");
+    o.value=value;
+    o.textContent=label;
+    select.appendChild(o);
+  });
+}
+
+function setDefaults(){
+  document.getElementById("monthFilter").value=currentMonthISO();
+  document.getElementById("incomeDate").value=todayISO();
+  document.getElementById("expenseDate").value=todayISO();
+}
+
+function updateKmField(){
+  document.getElementById("kmField").classList.toggle("hidden", document.getElementById("category").value!=="fuel");
+  updateCategoryAdvice();
+}
+
+function calculateExpense(){
+  const profession=document.getElementById("profession").value;
+  const category=document.getElementById("category").value;
+  const amount=Number(document.getElementById("expenseAmount").value);
+  const receipt=document.getElementById("receipt").value;
+  let businessUse=Number(document.getElementById("businessUse").value);
+
+  if(!amount||amount<=0){
+    alert("Ievadi izdevuma summu.");
+    return;
+  }
+
+  businessUse=Math.max(0,Math.min(100,businessUse));
+  const rule=rules[profession][category];
+  let percent=0;
+  let note=explanations[rule];
+
+  if((rule==="yes"||rule==="mixed") && receipt==="yes"){
+    percent=businessUse;
+  }
+
+  if(rule==="no"){
+    percent=0;
+  }
+
+  let fuelIncomplete = false;
+
+  if(category==="fuel"){
+    const totalKm=Number(document.getElementById("totalKm").value);
+    const workKm=Number(document.getElementById("workKm").value);
+
+    if(totalKm>0 && workKm>=0 && workKm<=totalKm){
+      percent = receipt==="yes"
+        ? Math.min((workKm/totalKm)*100,70)
+        : 0;
+
+      note="Degvielai izmantota darba braucienu proporcija. Personīgā vieglā auto degvielas un ekspluatācijas izdevumiem piemērojams maksimums 70% no faktiskajām izmaksām.";
+    }else{
+      fuelIncomplete = true;
+      percent = 0;
+      note="⚠ Degvielas izdevumu nevar korekti aprēķināt bez nobraukuma datiem. Ievadi kopējos kilometrus un darba kilometrus. Ieraksts netiks saglabāts, kamēr šie dati nav aizpildīti.";
+    }
+  }
+
+  if(receipt==="no"){
+    note += " Bez čeka/rēķina šajā beta versijā summa netiek ieskaitīta attiecināmajos izdevumos.";
+  }
+
+  const deductible=amount*percent/100;
+
+  const badgeClass = rule==="yes" ? "ok" : rule==="mixed" ? "warn" : "no";
+  const badgeText = rule==="yes" ? "Parasti attiecināms" : rule==="mixed" ? "Atkarīgs no lietojuma" : "Parasti nav attiecināms";
+
+  document.getElementById("expensePreview").classList.remove("hidden");
+
+  if(fuelIncomplete){
+    document.getElementById("previewBadge").innerHTML='<span class="badge warn">Nepieciešami nobraukuma dati</span>';
+  }else{
+    document.getElementById("previewBadge").innerHTML=`<span class="badge ${badgeClass}">${badgeText}</span>`;
+  }
+
+  document.getElementById("previewText").textContent=note;
+  document.getElementById("previewDeductible").textContent=
+    fuelIncomplete ? "—" : money(deductible);
+
+  pendingExpense = fuelIncomplete ? null : {
+    date:document.getElementById("expenseDate").value,
+    profession,
+    category,
+    categoryLabel:categories[category],
+    amount,
+    businessUse,
+    receipt,
+    deductible,
+    status:badgeText,
+    description:document.getElementById("expenseDescription").value.trim(),
+    recurring:document.getElementById("recurring").value,
+    receiptAttachment:pendingReceiptFile,
+    totalKm:category==="fuel" ? Number(document.getElementById("totalKm").value||0) : null,
+    workKm:category==="fuel" ? Number(document.getElementById("workKm").value||0) : null
+  };
+
+  document.getElementById("saveExpense").disabled=fuelIncomplete;
+}
+
+function addIncome(){
+  const date=document.getElementById("incomeDate").value;
+  const amount=Number(document.getElementById("incomeAmount").value);
+  const description=document.getElementById("incomeDescription").value.trim();
+
+  if(!date){
+    alert("Izvēlies datumu.");
+    return;
+  }
+
+  if(!amount||amount<=0){
+    alert("Ievadi ieņēmuma summu.");
+    return;
+  }
+
+  if(editingIncomeId){
+    const idx=data.income.findIndex(x=>x.id===editingIncomeId);
+
+    if(idx>=0){
+      data.income[idx]={
+        ...data.income[idx],
+        id:editingIncomeId,
+        date,
+        amount,
+        description
+      };
+    }
+  }else{
+    data.income.push({
+      id:Date.now()+"i",
+      date,
+      amount,
+      description
+    });
+  }
+
+  saveData();
+  resetIncomeForm();
+
+  document.getElementById("monthFilter").value=monthKey(date);
+  renderAll();
+}
+
+function resetIncomeForm(){
+  editingIncomeId=null;
+  document.getElementById("incomeDate").value=todayISO();
+  document.getElementById("incomeAmount").value="";
+  document.getElementById("incomeDescription").value="";
+  document.getElementById("incomeEditingNotice").classList.add("hidden");
+  document.getElementById("cancelIncomeEdit").classList.add("hidden");
+}
+
+function startEditIncome(id){
+  const item=data.income.find(x=>x.id===id);
+  if(!item) return;
+
+  editingIncomeId=id;
+
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".tab-content").forEach(x=>x.classList.add("hidden"));
+  document.querySelector('.tab[data-tab="income"]').classList.add("active");
+  document.getElementById("tab-income").classList.remove("hidden");
+
+  document.getElementById("incomeDate").value=item.date||todayISO();
+  document.getElementById("incomeAmount").value=item.amount||"";
+  document.getElementById("incomeDescription").value=item.description||"";
+
+  document.getElementById("incomeEditingNotice").classList.remove("hidden");
+  document.getElementById("cancelIncomeEdit").classList.remove("hidden");
+}
+
+function saveExpenseEntry(){
+  if(!pendingExpense) return;
+
+  if(!pendingExpense.date){
+    alert("Izvēlies datumu.");
+    return;
+  }
+
+  const selectedMonth=monthKey(pendingExpense.date);
+
+  if(editingExpenseId){
+    const idx=data.expenses.findIndex(x=>x.id===editingExpenseId);
+
+    if(idx>=0){
+      const existing=data.expenses[idx];
+
+      data.expenses[idx]={
+        ...existing,
+        ...pendingExpense,
+        id:editingExpenseId,
+        recurringSourceId:
+          pendingExpense.recurring==="monthly"
+            ? (existing.recurringSourceId||editingExpenseId)
+            : null,
+        isRecurringTemplate:
+          pendingExpense.recurring==="monthly"
+            ? (existing.isRecurringTemplate!==false)
+            : false
+      };
+    }
+  }else{
+    const newId=Date.now()+"e";
+
+    data.expenses.push({
+      id:newId,
+      ...pendingExpense,
+      recurringSourceId:pendingExpense.recurring==="monthly" ? newId : null,
+      isRecurringTemplate:pendingExpense.recurring==="monthly"
+    });
+  }
+
+  saveData();
+
+  document.getElementById("monthFilter").value=selectedMonth;
+  resetExpenseForm();
+  renderAll();
+}
+
+function deleteEntry(type,id){
+  if(type==="income"){
+    data.income=data.income.filter(x=>x.id!==id);
+  }else{
+    data.expenses=data.expenses.filter(x=>x.id!==id);
+  }
+  saveData();
+  renderAll();
+}
+
+
+function calculateMonthlyTaxes(profit){
+
+  profit = Math.max(0, Number(profit || 0));
+
+  if (profit <= 0) {
+    return {
+      vsao: 0,
+      iinReserve: 0,
+      safe: 0,
+      socialBaseUsed: 0,
+      note: "Nav pozitīvas peļņas"
+    };
+  }
+
+  let vsao = 0;
+  let socialBaseUsed = 0;
+  let note = "";
+
+  if (profit < TAX.minSocialBase) {
+
+    vsao = profit * TAX.pensionRate;
+
+    note =
+      "Peļņa zem 780 €: 10% pensiju apdrošināšanai.";
+
+  } else {
+
+    let chosenBase =
+      Number(document.getElementById("socialBase").value || TAX.minSocialBase);
+
+    chosenBase =
+      Math.max(TAX.minSocialBase, chosenBase);
+
+    socialBaseUsed =
+      Math.min(profit, chosenBase);
+
+    const fullPart =
+      socialBaseUsed * TAX.fullVsaoRate;
+
+    const remainder =
+      Math.max(0, profit - socialBaseUsed);
+
+    const pensionPart =
+      remainder * TAX.pensionRate;
+
+    vsao =
+      fullPart + pensionPart;
+
+    note =
+      "31,07% no " +
+      money(socialBaseUsed) +
+      (remainder > 0
+        ? " + 10% no atlikušās peļņas."
+        : ".");
+  }
+
+  const useMinimum =
+    document.getElementById("useMinimum").value === "yes";
+
+  const nonTaxable =
+    useMinimum
+      ? TAX.monthlyNonTaxable
+      : 0;
+
+  /*
+    IIN gala aprēķins ir gada aprēķins.
+    Šeit izmantojam mēneša rezervēšanas modeli:
+    peļņa - VSAOI - šim mēnesim pieejamais neapliekamais minimums.
+  */
+  const taxableForReserve =
+    Math.max(
+      0,
+      profit - vsao - nonTaxable
+    );
+
+  const iinReserve =
+    taxableForReserve * TAX.iinRate1;
+
+  const safe =
+    Math.max(
+      0,
+      profit - vsao - iinReserve
+    );
+
+  return {
+    vsao,
+    iinReserve,
+    safe,
+    socialBaseUsed,
+    note
+  };
+}
+
+function calculateYearToDateIin(selectedYear){
+
+  const months =
+    Array.from({length:12}, (_,i) =>
+      selectedYear + "-" + String(i+1).padStart(2,"0")
+    );
+
+  let totalProfit = 0;
+  let totalVsao = 0;
+  let activeMonths = 0;
+
+  months.forEach(month => {
+
+    const income =
+      data.income
+        .filter(x => monthKey(x.date) === month)
+        .reduce((s,x) => s + Number(x.amount || 0), 0);
+
+    const deductible =
+      data.expenses
+        .filter(x => monthKey(x.date) === month)
+        .reduce((s,x) => s + Number(x.deductible || 0), 0);
+
+    const profit =
+      income - deductible;
+
+    if (
+      income !== 0 ||
+      deductible !== 0
+    ) {
+      activeMonths++;
+    }
+
+    totalProfit += profit;
+
+    totalVsao +=
+      calculateMonthlyTaxes(profit).vsao;
+  });
+
+  const useMinimum =
+    document.getElementById("useMinimum").value === "yes";
+
+  /*
+    Rezerves modelī minimumu sadalām pa mēnešiem,
+    kuros lietotājam ir ievadīta darbība.
+    Gala gada deklarācijā EDS piemēro faktiskos gada noteikumus.
+  */
+  const nonTaxable =
+    useMinimum
+      ? activeMonths * TAX.monthlyNonTaxable
+      : 0;
+
+  let taxable =
+    Math.max(
+      0,
+      totalProfit - totalVsao - nonTaxable
+    );
+
+  const firstPart =
+    Math.min(
+      taxable,
+      TAX.iinThreshold
+    );
+
+  const secondPart =
+    Math.max(
+      0,
+      taxable - TAX.iinThreshold
+    );
+
+  return (
+    firstPart * TAX.iinRate1 +
+    secondPart * TAX.iinRate2
+  );
+}
+
+
+function getQuarterInfo(monthString){
+
+  if(!monthString){
+    monthString = currentMonthISO();
+  }
+
+  const year =
+    Number(monthString.slice(0,4));
+
+  const month =
+    Number(monthString.slice(5,7));
+
+  const quarter =
+    Math.floor((month - 1) / 3) + 1;
+
+  const startMonth =
+    (quarter - 1) * 3 + 1;
+
+  const months = [
+    year + "-" + String(startMonth).padStart(2,"0"),
+    year + "-" + String(startMonth + 1).padStart(2,"0"),
+    year + "-" + String(startMonth + 2).padStart(2,"0")
+  ];
+
+  return {
+    year,
+    quarter,
+    months
+  };
+}
+
+
+function calculateQuarterTaxes(monthString){
+
+  const q =
+    getQuarterInfo(monthString);
+
+  let vsao = 0;
+  let reserve = 0;
+
+  q.months.forEach(month => {
+
+    const income =
+      data.income
+        .filter(x => monthKey(x.date) === month)
+        .reduce((s,x) => s + Number(x.amount || 0), 0);
+
+    const deductible =
+      data.expenses
+        .filter(x => monthKey(x.date) === month)
+        .reduce((s,x) => s + Number(x.deductible || 0), 0);
+
+    const profit =
+      income - deductible;
+
+    const taxes =
+      calculateMonthlyTaxes(profit);
+
+    vsao += taxes.vsao;
+    reserve += taxes.vsao + taxes.iinReserve;
+  });
+
+  return {
+    vsao,
+    reserve,
+    quarter: q.quarter,
+    year: q.year
+  };
+}
+
+
+function formatDateLV(date){
+
+  return date.toLocaleDateString(
+    "lv-LV",
+    {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    }
+  );
+}
+
+
+function nextDeadline(dayType){
+
+  const now =
+    new Date();
+
+  const currentYear =
+    now.getFullYear();
+
+  const candidates = [];
+
+  /*
+    Q4 iepriekšējā gada termiņš ir janvārī,
+    tāpēc skatāmies arī nākamā gada janvāri.
+  */
+  for(let y = currentYear; y <= currentYear + 1; y++){
+
+    const day =
+      dayType === "report"
+        ? 17
+        : 23;
+
+    [1,4,7,10].forEach(month => {
+      candidates.push(
+        new Date(y, month - 1, day, 23, 59, 59)
+      );
+    });
+  }
+
+  return candidates.find(d => d >= now);
+}
+
+
+function renderDeadlines(){
+
+  const report =
+    nextDeadline("report");
+
+  const payment =
+    nextDeadline("payment");
+
+  document.getElementById("nextReportDate").textContent =
+    formatDateLV(report);
+
+  document.getElementById("nextPaymentDate").textContent =
+    formatDateLV(payment);
+
+  document.getElementById("nextReportText").textContent =
+    "Līdz šim datumam jāiesniedz pašnodarbinātā vai darba ņēmēja ziņojums par iepriekšējo ceturksni.";
+
+  document.getElementById("nextPaymentText").textContent =
+    "Līdz šim datumam jāsamaksā attiecīgā ceturkšņa VSAOI.";
+}
+
+
+function renderQuarterReserve(){
+
+  const result =
+    calculateQuarterTaxes(currentMonth());
+
+  const reserved =
+    Math.max(
+      0,
+      Number(
+        document.getElementById("alreadyReserved").value || 0
+      )
+    );
+
+  const shortfall =
+    Math.max(
+      0,
+      result.reserve - reserved
+    );
+
+  document.getElementById("quarterVsao").textContent =
+    money(result.vsao);
+
+  document.getElementById("quarterReserve").textContent =
+    money(result.reserve);
+
+  document.getElementById("reserveShortfall").textContent =
+    money(shortfall);
+}
+
+function renderSummary(){
+  const month=currentMonth();
+
+  const income=data.income
+    .filter(x=>monthKey(x.date)===month)
+    .reduce((s,x)=>s+Number(x.amount||0),0);
+
+  const expenses=data.expenses
+    .filter(x=>monthKey(x.date)===month);
+
+  const deductible=expenses
+    .reduce((s,x)=>s+Number(x.deductible||0),0);
+
+  const profit=income-deductible;
+
+  const taxes =
+    calculateMonthlyTaxes(profit);
+
+  document.getElementById("sumIncome").textContent=money(income);
+  document.getElementById("sumDeductible").textContent=money(deductible);
+  document.getElementById("sumProfit").textContent=money(profit);
+  document.getElementById("sumVsaoI").textContent=money(taxes.vsao);
+  document.getElementById("sumIin").textContent=money(taxes.iinReserve);
+  document.getElementById("sumSafe").textContent=money(taxes.safe);
+  document.getElementById("sumReserve").textContent=money(taxes.vsao + taxes.iinReserve);
+
+  document.getElementById("sumVsaoINote").textContent=
+    taxes.note;
+}
+
+function renderHistory(){
+  const month=currentMonth();
+  const body=document.getElementById("historyBody");
+
+  const entries=[
+    ...data.income
+      .filter(x=>monthKey(x.date)===month)
+      .map(x=>({
+        type:"income",
+        id:x.id,
+        date:x.date,
+        description:x.description||"Ieņēmums",
+        amount:x.amount,
+        deductible:null,
+        recurring:"no",
+        attachment:null
+      })),
+    ...data.expenses
+      .filter(x=>monthKey(x.date)===month)
+      .map(x=>({
+        type:"expense",
+        id:x.id,
+        date:x.date,
+        description:x.description||x.categoryLabel,
+        amount:x.amount,
+        deductible:x.deductible,
+        recurring:x.recurring||"no",
+        attachment:x.receiptAttachment||null
+      }))
+  ].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+
+  body.innerHTML="";
+
+  document.getElementById("historyEmpty").style.display=entries.length?"none":"block";
+
+  entries.forEach(item=>{
+    const tr=document.createElement("tr");
+
+    const documentCell=item.attachment
+      ? `<a href="${item.attachment.dataUrl}" target="_blank" rel="noopener">Atvērt</a>`
+      : "—";
+
+    const recurringCell=
+      item.type==="expense" && item.recurring==="monthly"
+        ? "Katru mēnesi"
+        : "—";
+
+    const actions=
+      item.type==="expense"
+        ? `<div class="action-row"><button class="secondary small edit-expense-btn" data-id="${item.id}">Labot</button><button class="danger small delete-btn" data-type="${item.type}" data-id="${item.id}">Dzēst</button></div>`
+        : `<div class="action-row"><button class="secondary small edit-income-btn" data-id="${item.id}">Labot</button><button class="danger small delete-btn" data-type="${item.type}" data-id="${item.id}">Dzēst</button></div>`;
+
+    tr.innerHTML=`
+      <td>${escapeHtml(item.date)}</td>
+      <td>${item.type==="income"?"Ieņēmums":"Izdevums"}</td>
+      <td>${escapeHtml(item.description)}</td>
+      <td class="right">${money(item.amount)}</td>
+      <td class="right">${item.type==="expense"?money(item.deductible):"—"}</td>
+      <td>${recurringCell}</td>
+      <td>${documentCell}</td>
+      <td>${actions}</td>
+    `;
+
+    body.appendChild(tr);
+  });
+
+  body.querySelectorAll(".delete-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      deleteEntry(btn.dataset.type,btn.dataset.id);
+    });
+  });
+
+  body.querySelectorAll(".edit-expense-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      startEditExpense(btn.dataset.id);
+    });
+  });
+
+  body.querySelectorAll(".edit-income-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      startEditIncome(btn.dataset.id);
+    });
+  });
+}
+
+
+
+function professionLabel(value){
+  const map={
+    it:"IT / datorsistēmu tehniķis",
+    beauty:"Frizieris / skaistumkopšana",
+    photo:"Fotogrāfs / video",
+    trades:"Meistars / remontdarbi",
+    consultant:"Konsultants / freelanceris",
+    other:"Cits"
+  };
+  return map[value]||value||"Nav norādīts";
+}
+
+function renderProfileSummary(){
+  const p=data.profile||{};
+
+  if(!p.completed){
+    document.getElementById("profileSummary").textContent="Profils vēl nav iestatīts.";
+    return;
+  }
+
+  const profession=p.profession==="other" && p.otherProfession
+    ? p.otherProfession
+    : professionLabel(p.profession);
+
+  const workplaceMap={
+    home:"No mājām",
+    client:"Pie klientiem",
+    rented:"Nomātās telpās",
+    mixed:"Dažādi"
+  };
+
+  const activityMap={
+    services:"Pakalpojumi",
+    goods:"Preces",
+    mixed:"Preces un pakalpojumi"
+  };
+
+  document.getElementById("profileSummary").innerHTML=
+    "<strong>"+escapeHtml(p.name||"Bez nosaukuma")+"</strong><br>"+
+    '<span class="profile-chip">'+escapeHtml(profession)+'</span>'+
+    '<span class="profile-chip">'+escapeHtml(activityMap[p.activityType]||"")+'</span>'+
+    '<span class="profile-chip">'+escapeHtml(workplaceMap[p.workplace]||"")+'</span>'+
+    (p.usesCar==="yes" ? '<span class="profile-chip">Izmanto auto darbam</span>' : "")+
+    (p.otherJob==="yes" ? '<span class="profile-chip">Ir arī algots darbs</span>' : "")+
+    (p.vat==="yes" ? '<span class="profile-chip">PVN maksātājs</span>' : "");
+}
+
+function openOnboarding(edit=false){
+  const p=data.profile||{};
+
+  document.getElementById("profileName").value=p.name||"";
+  document.getElementById("profileProfession").value=p.profession||"it";
+  document.getElementById("profileOther").value=p.otherProfession||"";
+  document.getElementById("profileActivityType").value=p.activityType||"services";
+  document.getElementById("profileWorkplace").value=p.workplace||"home";
+  document.getElementById("profileCar").value=p.usesCar||"no";
+  document.getElementById("profileOtherJob").value=p.otherJob||"no";
+  document.getElementById("profileVat").value=p.vat||"no";
+
+  updateOtherProfessionVisibility();
+  updateVatWarning();
+  showOnboardingStep(1);
+
+  document.getElementById("onboarding").classList.remove("hidden");
+}
+
+function closeOnboarding(){
+  document.getElementById("onboarding").classList.add("hidden");
+}
+
+function showOnboardingStep(step){
+  [1,2,3].forEach(n=>{
+    document.getElementById("onboardingStep"+n).classList.toggle("hidden",n!==step);
+    const dot=document.querySelector('[data-step-dot="'+n+'"]');
+    if(dot) dot.classList.toggle("active",n===step);
+  });
+}
+
+function updateOtherProfessionVisibility(){
+  const isOther=document.getElementById("profileProfession").value==="other";
+  document.getElementById("profileOtherWrap").classList.toggle("hidden",!isOther);
+}
+
+function updateVatWarning(){
+  document.getElementById("vatWarning").classList.toggle(
+    "hidden",
+    document.getElementById("profileVat").value!=="yes"
+  );
+}
+
+function finishProfile(){
+  const profession=document.getElementById("profileProfession").value;
+  const otherProfession=document.getElementById("profileOther").value.trim();
+
+  if(profession==="other" && !otherProfession){
+    alert("Apraksti savu darbību.");
+    return;
+  }
+
+  data.profile={
+    completed:true,
+    name:document.getElementById("profileName").value.trim(),
+    profession,
+    otherProfession,
+    activityType:document.getElementById("profileActivityType").value,
+    workplace:document.getElementById("profileWorkplace").value,
+    usesCar:document.getElementById("profileCar").value,
+    otherJob:document.getElementById("profileOtherJob").value,
+    vat:document.getElementById("profileVat").value
+  };
+
+  if(profession!=="other" && document.getElementById("profession").querySelector('option[value="'+profession+'"]')){
+    document.getElementById("profession").value=profession;
+  }
+
+  if(data.profile.otherJob==="yes"){
+    document.getElementById("useMinimum").value="no";
+  }
+
+  saveData();
+  renderProfileSummary();
+  updateCategoryAdvice();
+  renderAll();
+  closeOnboarding();
+}
+
+function maybeStartOnboarding(){
+  if(!data.profile || !data.profile.completed){
+    openOnboarding();
+  }else{
+    renderProfileSummary();
+
+    const p=data.profile;
+    if(p.profession && p.profession!=="other" && document.getElementById("profession").querySelector('option[value="'+p.profession+'"]')){
+      document.getElementById("profession").value=p.profession;
+    }
+
+    if(p.otherJob==="yes"){
+      document.getElementById("useMinimum").value="no";
+    }
+  }
+}
+
+function csvEscape(value){
+  const s=String(value??"");
+  if(/[;"\n\r]/.test(s)){
+    return '"'+s.replaceAll('"','""')+'"';
+  }
+  return s;
+}
+
+function downloadBlob(filename, content, mime){
+  const blob=new Blob([content],{type:mime});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+function exportCsv(){
+  const rows=[
+    ["Datums","Tips","Apraksts","Kategorija","Summa","Attiecināmā summa","Atkārtojas"]
+  ];
+
+  data.income.forEach(x=>{
+    rows.push([
+      x.date,
+      "Ieņēmums",
+      x.description||"",
+      "",
+      Number(x.amount||0).toFixed(2),
+      "",
+      ""
+    ]);
+  });
+
+  data.expenses.forEach(x=>{
+    rows.push([
+      x.date,
+      "Izdevums",
+      x.description||"",
+      x.categoryLabel||categories[x.category]||"",
+      Number(x.amount||0).toFixed(2),
+      Number(x.deductible||0).toFixed(2),
+      x.recurring==="monthly" ? "Katru mēnesi" : "Nē"
+    ]);
+  });
+
+  rows.sort((a,b)=>{
+    if(a[0]==="Datums") return -1;
+    if(b[0]==="Datums") return 1;
+    return String(a[0]).localeCompare(String(b[0]));
+  });
+
+  const csv="\uFEFF"+rows.map(r=>r.map(csvEscape).join(";")).join("\r\n");
+  downloadBlob(
+    "pasnodarbinata_dati_"+new Date().toISOString().slice(0,10)+".csv",
+    csv,
+    "text/csv;charset=utf-8"
+  );
+}
+
+function backupData(){
+  saveData();
+
+  const payload={
+    app:"Pasnodarbinata Beta",
+    version:7,
+    exportedAt:new Date().toISOString(),
+    data
+  };
+
+  downloadBlob(
+    "pasnodarbinata_backup_"+new Date().toISOString().slice(0,10)+".json",
+    JSON.stringify(payload,null,2),
+    "application/json"
+  );
+}
+
+async function restoreDataFromFile(file){
+  if(!file) return;
+
+  try{
+    const raw=await file.text();
+    const parsed=JSON.parse(raw);
+
+    const restored=parsed.data || parsed;
+
+    if(!restored || !Array.isArray(restored.income) || !Array.isArray(restored.expenses)){
+      throw new Error("Failā nav atpazīstamu lietotnes datu.");
+    }
+
+    if(!confirm("Atjaunot datus no rezerves kopijas? Pašreizējie dati tiks aizstāti.")){
+      return;
+    }
+
+    data={
+      income:restored.income,
+      expenses:restored.expenses,
+      settings:restored.settings||{},
+      profile:restored.profile||{}
+    };
+
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(data));
+    applySavedSettings();
+    addRecurringForMonth(currentMonth());
+    renderAll();
+
+    alert("Rezerves kopija atjaunota.");
+  }catch(err){
+    alert("Neizdevās atjaunot rezerves kopiju: "+err.message);
+  }
+}
+
+function applySavedSettings(){
+  const settings=data.settings||{};
+
+  if(settings.socialBase!=null){
+    document.getElementById("socialBase").value=settings.socialBase;
+  }
+
+  if(settings.useMinimum){
+    document.getElementById("useMinimum").value=settings.useMinimum;
+  }
+
+  if(settings.alreadyReserved!=null){
+    document.getElementById("alreadyReserved").value=settings.alreadyReserved;
+  }
+}
+
+function renderAll(){
+  renderSummary();
+  renderHistory();
+  renderQuarterReserve();
+  renderDeadlines();
+
+  const selectedMonth =
+    currentMonth();
+
+  const selectedYear =
+    selectedMonth
+      ? selectedMonth.slice(0,4)
+      : String(new Date().getFullYear());
+
+  document.getElementById("yearIin").textContent =
+    money(
+      calculateYearToDateIin(selectedYear)
+    );
+}
+
+document.querySelectorAll(".tab").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(x=>x.classList.add("hidden"));
+    btn.classList.add("active");
+    document.getElementById("tab-"+btn.dataset.tab).classList.remove("hidden");
+  });
+});
+
+document.getElementById("category").addEventListener("change",updateKmField);
+document.getElementById("profession").addEventListener("change",updateCategoryAdvice);
+
+document.getElementById("receiptFile").addEventListener("change",async(e)=>{
+  const file=e.target.files[0];
+
+  if(!file){
+    pendingReceiptFile=null;
+    renderReceiptPreview(null);
+    return;
+  }
+
+  try{
+    pendingReceiptFile=await readReceiptFile(file);
+    renderReceiptPreview(pendingReceiptFile);
+  }catch(err){
+    alert(err.message);
+    e.target.value="";
+    pendingReceiptFile=null;
+    renderReceiptPreview(null);
+  }
+});
+
+document.getElementById("cancelEdit").addEventListener("click",resetExpenseForm);
+document.getElementById("checkExpense").addEventListener("click",calculateExpense);
+document.getElementById("saveExpense").addEventListener("click",saveExpenseEntry);
+document.getElementById("addIncome").addEventListener("click",addIncome);
+document.getElementById("cancelIncomeEdit").addEventListener("click",resetIncomeForm);
+
+document.getElementById("exportCsv").addEventListener("click",exportCsv);
+document.getElementById("backupJson").addEventListener("click",backupData);
+document.getElementById("restoreJson").addEventListener("click",()=>{
+  document.getElementById("restoreFile").click();
+});
+document.getElementById("restoreFile").addEventListener("change",async(e)=>{
+  const file=e.target.files[0];
+  await restoreDataFromFile(file);
+  e.target.value="";
+});
+
+document.getElementById("editProfile").addEventListener("click",()=>openOnboarding(true));
+document.getElementById("profileProfession").addEventListener("change",updateOtherProfessionVisibility);
+document.getElementById("profileVat").addEventListener("change",updateVatWarning);
+
+document.getElementById("onboardingNext1").addEventListener("click",()=>{
+  showOnboardingStep(2);
+});
+document.getElementById("onboardingBack2").addEventListener("click",()=>{
+  showOnboardingStep(1);
+});
+document.getElementById("onboardingNext2").addEventListener("click",()=>{
+  showOnboardingStep(3);
+});
+document.getElementById("onboardingBack3").addEventListener("click",()=>{
+  showOnboardingStep(2);
+});
+document.getElementById("finishOnboarding").addEventListener("click",finishProfile);
+
+document.getElementById("monthFilter").addEventListener("change",()=>{
+  addRecurringForMonth(currentMonth());
+  renderAll();
+});
+document.getElementById("socialBase").addEventListener("input",()=>{
+  saveData();
+  renderAll();
+});
+document.getElementById("useMinimum").addEventListener("change",()=>{
+  saveData();
+  renderAll();
+});
+document.getElementById("alreadyReserved").addEventListener("input",()=>{
+  saveData();
+  renderQuarterReserve();
+});
+
+document.getElementById("clearAll").addEventListener("click",()=>{
+  if(confirm("Tiešām dzēst visus beta datus šajā pārlūkā?")){
+    data={income:[],expenses:[],settings:{},profile:{}};
+    saveData();
+    resetIncomeForm();
+    resetExpenseForm();
+    renderAll();
+  }
+});
+
+populateCategories();
+setDefaults();
+applySavedSettings();
+updateKmField();
+updateCategoryAdvice();
+addRecurringForMonth(currentMonth());
+renderProfileSummary();
+renderAll();
+maybeStartOnboarding();
+</script>
+
+<div id="onboarding" class="onboarding hidden">
+  <div class="onboarding-card">
+    <div class="onboarding-steps">
+      <span class="step-dot active" data-step-dot="1">1. Par tevi</span>
+      <span class="step-dot" data-step-dot="2">2. Darbība</span>
+      <span class="step-dot" data-step-dot="3">3. Nodokļi</span>
+    </div>
+
+    <div id="onboardingStep1">
+      <h2>Sāksim ar pamatiem</h2>
+      <div class="field">
+        <label for="profileName">Vārds vai uzņēmuma nosaukums</label>
+        <input id="profileName" type="text" placeholder="Piem., Nauris / NC IT">
+      </div>
+      <div class="field">
+        <label for="profileProfession">Galvenā nozare / profesija</label>
+        <select id="profileProfession">
+          <option value="it">IT / datorsistēmu tehniķis</option>
+          <option value="beauty">Frizieris / skaistumkopšana</option>
+          <option value="photo">Fotogrāfs / video</option>
+          <option value="trades">Meistars / remontdarbi</option>
+          <option value="consultant">Konsultants / freelanceris</option>
+          <option value="other">Cits</option>
+        </select>
+      </div>
+      <div class="field hidden" id="profileOtherWrap">
+        <label for="profileOther">Apraksti savu darbību</label>
+        <input id="profileOther" type="text" placeholder="Piem., tulks, treneris, dizainers">
+      </div>
+      <div class="action-row">
+        <button id="onboardingNext1">Tālāk</button>
+      </div>
+    </div>
+
+    <div id="onboardingStep2" class="hidden">
+      <h2>Kā tu strādā?</h2>
+      <div class="field">
+        <label for="profileActivityType">Darba veids</label>
+        <select id="profileActivityType">
+          <option value="services">Pakalpojumi</option>
+          <option value="goods">Preces</option>
+          <option value="mixed">Gan pakalpojumi, gan preces</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="profileWorkplace">Kur galvenokārt strādā?</label>
+        <select id="profileWorkplace">
+          <option value="home">No mājām</option>
+          <option value="client">Pie klientiem</option>
+          <option value="rented">Nomātās telpās</option>
+          <option value="mixed">Dažādi</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="profileCar">Izmanto personīgo auto darbam?</label>
+        <select id="profileCar">
+          <option value="no">Nē</option>
+          <option value="yes">Jā</option>
+        </select>
+      </div>
+      <div class="action-row">
+        <button id="onboardingBack2" class="secondary">Atpakaļ</button>
+        <button id="onboardingNext2">Tālāk</button>
+      </div>
+    </div>
+
+    <div id="onboardingStep3" class="hidden">
+      <h2>Nodokļu iestatījumi</h2>
+      <div class="field">
+        <label for="profileOtherJob">Vai tev ir arī algots darbs?</label>
+        <select id="profileOtherJob">
+          <option value="no">Nē</option>
+          <option value="yes">Jā</option>
+        </select>
+        <div class="hint">Tas var ietekmēt neapliekamā minimuma izmantošanu un gada IIN aprēķinu.</div>
+      </div>
+      <div class="field">
+        <label for="profileVat">Vai esi PVN maksātājs?</label>
+        <select id="profileVat">
+          <option value="no">Nē</option>
+          <option value="yes">Jā</option>
+        </select>
+        <div class="hint">PVN loģiku šī beta versija vēl nerēķina. Ja izvēlies “Jā”, rādīsim brīdinājumu.</div>
+      </div>
+
+      <div id="vatWarning" class="notice hidden" style="margin-bottom:14px;">
+        Šī beta versija vēl nav paredzēta pilnai PVN uzskaitei.
+      </div>
+
+      <div class="action-row">
+        <button id="onboardingBack3" class="secondary">Atpakaļ</button>
+        <button id="finishOnboarding">Saglabāt profilu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
