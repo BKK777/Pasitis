@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="lv">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Pašnodarbinātā panelis — Beta v2</title>
 <style>
 *{box-sizing:border-box}
@@ -52,390 +53,434 @@ th{background:#f8fafc}
 @media(max-width:850px){.app-shell{grid-template-columns:1fr}.sidebar{position:relative;height:auto;display:none}.sidebar.open{display:block}.mobile-menu{display:inline-block}.main{padding:18px 12px}}@media(max-width:700px){.grid,.summary{grid-template-columns:1fr}}
 </style>
 </head>
-
 <body>
 <div class="app-shell">
 <aside class="sidebar" id="sidebar">
-  <h2>Pašnodarbinātais</h2>
-  <button class="nav-btn active" data-section="dashboard">Pārskats</button>
-  <button class="nav-btn" data-section="profile">Biznesa profils</button>
-  <button class="nav-btn" data-section="tax">Nodokļu iestatījumi</button>
-  <button class="nav-btn" data-section="income">Pievienot ieņēmumu</button>
-  <button class="nav-btn" data-section="expense">Pievienot izdevumu</button>
-  <button class="nav-btn" data-section="history">Visi ieraksti</button>
-  <button class="nav-btn" data-section="backup">Eksports un rezerves kopija</button>
+<h2>Pašnodarbinātais</h2>
+<button class="nav-btn active" data-section="dashboard">Pārskats</button>
+<button class="nav-btn" data-section="profile">Biznesa profils</button>
+<button class="nav-btn" data-section="tax">Nodokļu iestatījumi</button>
+<button class="nav-btn" data-section="income">Pievienot ieņēmumu</button>
+<button class="nav-btn" data-section="expense">Pievienot izdevumu</button>
+<button class="nav-btn" data-section="history">Visi ieraksti</button>
+<button class="nav-btn" data-section="backup">Eksports un rezerves kopija</button>
 </aside>
-
 <div class="main">
-<button id="mobileMenu" class="secondary mobile-menu">☰ Izvēlne</button>
+<button class="secondary mobile-menu" id="mobileMenu">☰ Izvēlne</button>
 
-  <section id="section-dashboard" class="page-section active">
-  <div class="topbar">
-    <div>
-      <h1>Pašnodarbinātā panelis</h1>
-      <div class="subtitle">Beta v9 — sānu navigācija un salabots onboarding</div>
-    </div>
 
-    <div style="min-width:220px;">
-      <label for="monthFilter">Skatīt mēnesi</label>
-      <input id="monthFilter" type="month">
-    </div>
+
+<section class="page-section active" id="section-dashboard">
+<div class="topbar">
+<div>
+<h1>Pašnodarbinātā panelis</h1>
+<div class="subtitle">Beta v12 — salabota sadaļu struktūra</div>
+</div>
+<div style="min-width:220px;">
+<label for="monthFilter">Skatīt mēnesi</label>
+<input id="monthFilter" type="month"/>
+</div>
+</div>
+<h2 style="margin-top:18px;">Šī mēneša pārskats</h2>
+<div class="summary">
+<div class="summary-card">
+<div class="summary-label">Ieņēmumi</div>
+<div class="summary-value" id="sumIncome">0,00 €</div>
+<div class="summary-note">izvēlētajā mēnesī</div>
+</div>
+<div class="summary-card">
+<div class="summary-label">Attiecināmie izdevumi</div>
+<div class="summary-value" id="sumDeductible">0,00 €</div>
+<div class="summary-note">izvēlētajā mēnesī</div>
+</div>
+<div class="summary-card">
+<div class="summary-label">Peļņa pirms nodokļiem</div>
+<div class="summary-value" id="sumProfit">0,00 €</div>
+<div class="summary-note">ieņēmumi − attiecināmie izdevumi</div>
+</div>
+<div class="summary-card">
+<div class="summary-label">Aptuvenās VSAOI</div>
+<div class="summary-value" id="sumVsaoI">0,00 €</div>
+<div class="summary-note" id="sumVsaoINote">2026. gada likmes</div>
+</div>
+<div class="summary-card">
+<div class="summary-label">IIN rezerve</div>
+<div class="summary-value" id="sumIin">0,00 €</div>
+<div class="summary-note">orientējoši šim mēnesim</div>
+</div>
+<div class="summary-card">
+<div class="summary-label">Droši atstāt sev</div>
+<div class="summary-value" id="sumSafe">0,00 €</div>
+<div class="summary-note">peļņa − VSAOI − IIN rezerve</div>
+</div>
+<div class="summary-card">
+<div class="summary-label">Atlikt nodokļiem</div>
+<div class="summary-value" id="sumReserve">0,00 €</div>
+<div class="summary-note">VSAOI + IIN rezerve šim mēnesim</div>
+</div>
+<div class="card smalltext">
+<strong>Beta:</strong> dati glabājas tikai šīs pārlūkprogrammas <code>localStorage</code>. Ja notīrīsi pārlūka datus vai izmantosi citu ierīci, ieraksti tur nebūs pieejami.
   </div>
-
-  </section>
-
-  <section id="section-profile" class="page-section">
-  <div class="card">
-    <div class="topbar">
-      <div>
-        <h2 style="margin-bottom:8px;">Biznesa profils</h2>
-        <div id="profileSummary" class="smalltext">Profils vēl nav iestatīts.</div>
-      </div>
-      <button id="editProfile" class="secondary">Labot profilu</button>
-    </div>
-  </div>
-
-  </section>
-
-  <section id="section-backup" class="page-section">
-  <div class="card">
-    <h2>Eksports un rezerves kopija</h2>
-    <div class="action-row">
-      <button id="exportCsv">Eksportēt CSV</button>
-      <button id="backupJson" class="secondary">Lejupielādēt rezerves kopiju</button>
-      <button id="restoreJson" class="secondary">Atjaunot no rezerves kopijas</button>
-      <input id="restoreFile" type="file" accept=".json,application/json" class="hidden">
-    </div>
-    <div class="hint" style="margin-top:8px;">
-      CSV der Excel. Rezerves kopija saglabā visus ieņēmumus, izdevumus, iestatījumus un pievienotos dokumentus.
-    </div>
-  </div>
-
-  </section>
-
-  <section id="section-tax" class="page-section">
-  <h1>Nodokļu iestatījumi</h1>
-  <div class="summary">
-    <div class="summary-card">
-      <div class="summary-label">Ieņēmumi</div>
-      <div id="sumIncome" class="summary-value">0,00 €</div>
-      <div class="summary-note">izvēlētajā mēnesī</div>
-    </div>
-
-    <div class="summary-card">
-      <div class="summary-label">Attiecināmie izdevumi</div>
-      <div id="sumDeductible" class="summary-value">0,00 €</div>
-      <div class="summary-note">izvēlētajā mēnesī</div>
-    </div>
-
-    <div class="summary-card">
-      <div class="summary-label">Peļņa pirms nodokļiem</div>
-      <div id="sumProfit" class="summary-value">0,00 €</div>
-      <div class="summary-note">ieņēmumi − attiecināmie izdevumi</div>
-    </div>
-
-    <div class="summary-card">
-      <div class="summary-label">Aptuvenās VSAOI</div>
-      <div id="sumVsaoI" class="summary-value">0,00 €</div>
-      <div id="sumVsaoINote" class="summary-note">2026. gada likmes</div>
-    </div>
-
-    <div class="summary-card">
-      <div class="summary-label">IIN rezerve</div>
-      <div id="sumIin" class="summary-value">0,00 €</div>
-      <div class="summary-note">orientējoši šim mēnesim</div>
-    </div>
-
-    <div class="summary-card">
-      <div class="summary-label">Droši atstāt sev</div>
-      <div id="sumSafe" class="summary-value">0,00 €</div>
-      <div class="summary-note">peļņa − VSAOI − IIN rezerve</div>
-    </div>
-
-    <div class="summary-card">
-      <div class="summary-label">Atlikt nodokļiem</div>
-      <div id="sumReserve" class="summary-value">0,00 €</div>
-      <div class="summary-note">VSAOI + IIN rezerve šim mēnesim</div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Nodokļu iestatījumi</h2>
-    <div class="grid">
-      <div class="field">
-        <label for="socialBase">Pilno VSAOI bāze mēnesī (€)</label>
-        <input id="socialBase" type="number" min="780" step="1" value="780">
-        <div class="hint">Ja mēneša peļņa ir vismaz 780 €, pilnās VSAOI jāveic vismaz no 780 €. Vari izvēlēties lielāku bāzi.</div>
-      </div>
-
-      <div class="field">
-        <label for="useMinimum">Neapliekamais minimums šim aprēķinam</label>
-        <select id="useMinimum">
-          <option value="yes">Jā — 550 €/mēn.</option>
-          <option value="no">Nē</option>
-        </select>
-        <div class="hint">Ja neapliekamo minimumu jau izmanto citur (piem., algotā darbā), izvēlies “Nē”.</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card notice">
-    <strong>Beta nodokļu aprēķins.</strong>
+</div></section><section class="page-section" id="section-profile">
+<h1>Biznesa profils</h1>
+<div class="card">
+<div class="topbar">
+<div>
+<h2 style="margin-bottom:8px;">Biznesa profils</h2>
+<div class="smalltext" id="profileSummary">Profils vēl nav iestatīts.</div>
+</div>
+<button class="secondary" id="editProfile">Labot profilu</button>
+</div>
+</div>
+</section><section class="page-section" id="section-tax">
+<h1>Nodokļu iestatījumi</h1>
+<div class="card">
+<h2>Nodokļu iestatījumi</h2>
+<div class="grid">
+<div class="field">
+<label for="socialBase">Pilno VSAOI bāze mēnesī (€)</label>
+<input id="socialBase" min="780" step="1" type="number" value="780"/>
+<div class="hint">Ja mēneša peļņa ir vismaz 780 €, pilnās VSAOI jāveic vismaz no 780 €. Vari izvēlēties lielāku bāzi.</div>
+</div>
+<div class="field">
+<label for="useMinimum">Neapliekamais minimums šim aprēķinam</label>
+<select id="useMinimum">
+<option value="yes">Jā — 550 €/mēn.</option>
+<option value="no">Nē</option>
+</select>
+<div class="hint">Ja neapliekamo minimumu jau izmanto citur (piem., algotā darbā), izvēlies “Nē”.</div>
+</div>
+</div>
+</div><div class="card notice">
+<strong>Beta nodokļu aprēķins.</strong>
     VSAOI tiek rēķinātas no konkrētā mēneša peļņas. IIN šeit ir naudas rezerves novērtējums, nevis gala deklarācijas aprēķins, jo IIN Latvijā tiek noteikts gada griezumā un var būt atkarīgs arī no citiem ienākumiem un atvieglojumiem.
-  </div>
-
-  </section>
-
-  <div class="tabs hidden">
-    <button class="tab active" data-tab="income">Ieņēmumi</button>
-    <button class="tab" data-tab="expense">Izdevumi</button>
-    <button class="tab" data-tab="history">Visi ieraksti</button>
-  </div>
-
-  <!-- INCOME -->
-  <section id="section-income" class="page-section">
-    <div class="card">
-      <h2>Pievienot ieņēmumu</h2>
-      <div class="grid">
-        <div class="field">
-          <label for="incomeDate">Datums</label>
-          <input id="incomeDate" type="date">
-        </div>
-
-        <div class="field">
-          <label for="incomeAmount">Summa (€)</label>
-          <input id="incomeAmount" type="number" min="0" step="0.01" placeholder="Piem., 850.00">
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="incomeDescription">Apraksts</label>
-        <input id="incomeDescription" type="text" placeholder="Piem., Mājaslapas izstrāde klientam">
-      </div>
-
-      <div id="incomeEditingNotice" class="edit-note hidden">
-        Tu rediģē esošu ieņēmumu. Saglabājot tas tiks aizstāts.
-      </div>
-
-      <div class="action-row">
-        <button id="addIncome">Saglabāt ieņēmumu</button>
-        <button id="cancelIncomeEdit" class="secondary hidden">Atcelt rediģēšanu</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- EXPENSE -->
-  <section id="section-expense" class="page-section">
-    <div class="card">
-      <h2>Pievienot izdevumu</h2>
-
-      <div class="grid">
-        <div class="field">
-          <label for="expenseDate">Datums</label>
-          <input id="expenseDate" type="date">
-        </div>
-
-        <div class="field">
-          <label for="profession">Nozare / profesija</label>
-          <select id="profession">
-            <option value="it">IT / datorsistēmu tehniķis</option>
-            <option value="beauty">Frizieris / skaistumkopšana</option>
-            <option value="photo">Fotogrāfs / video</option>
-            <option value="trades">Meistars / remontdarbi</option>
-            <option value="consultant">Konsultants / freelanceris</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="category">Izdevuma kategorija</label>
-          <select id="category"></select>
-        </div>
-
-        <div class="field">
-          <label for="expenseAmount">Summa (€)</label>
-          <input id="expenseAmount" type="number" min="0" step="0.01" placeholder="Piem., 120.00">
-        </div>
-
-        <div class="field">
-          <label for="businessUse">Darba lietojums (%)</label>
-          <input id="businessUse" type="number" min="0" max="100" step="1" value="100">
-        </div>
-
-        <div class="field">
-          <label for="receipt">Ir čeks / rēķins?</label>
-          <select id="receipt">
-            <option value="yes">Jā</option>
-            <option value="no">Nē</option>
-          </select>
-        </div>
-      </div>
-
-      <div id="kmField" class="field hidden">
-        <label>Degvielas aprēķins</label>
-        <div class="grid">
-          <div>
-            <input id="totalKm" type="number" min="0" step="1" placeholder="Kopējie km">
-            <div class="hint">Kopējais nobraukums</div>
-          </div>
-          <div>
-            <input id="workKm" type="number" min="0" step="1" placeholder="Darba km">
-            <div class="hint">Darba braucieni</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="expenseDescription">Pamatojums / apraksts</label>
-        <textarea id="expenseDescription" placeholder="Piem., brauciens pie klienta, darba programmatūra, profesionālais šampūns klientiem..."></textarea>
-      </div>
-
-      <div class="grid">
-        <div class="field">
-          <label for="recurring">Atkārtots izdevums</label>
-          <select id="recurring">
-            <option value="no">Nē</option>
-            <option value="monthly">Katru mēnesi</option>
-          </select>
-          <div class="hint">Piem., telefons, internets, programmatūra, noma.</div>
-        </div>
-
-        <div class="field">
-          <label for="receiptFile">Čeka / rēķina fails</label>
-          <input id="receiptFile" type="file" accept="image/*,.pdf">
-          <div class="hint">Beta versijā fails glabājas tikai šajā pārlūkā. Ieteicams zem 700 KB.</div>
-          <div id="receiptPreview" class="file-preview"></div>
-        </div>
-      </div>
-
-      <div id="categoryAdvice" class="notice" style="margin-bottom:14px;"></div>
-
-      <div id="editingNotice" class="edit-note hidden">
-        Tu rediģē esošu izdevumu. Saglabājot tas tiks aizstāts.
-      </div>
-
-      <div id="expensePreview" class="card hidden" style="background:#f8fafc;box-shadow:none;">
-        <div id="previewBadge"></div>
-        <div id="previewText" style="margin-top:10px;line-height:1.5;"></div>
-        <div style="margin-top:10px;">
-          Attiecināmā summa:
-          <strong id="previewDeductible"></strong>
-        </div>
-      </div>
-
-      <div class="action-row">
-        <button id="checkExpense">Pārbaudīt</button>
-        <button id="saveExpense" class="secondary" disabled>Saglabāt izdevumu</button>
-        <button id="cancelEdit" class="secondary hidden">Atcelt rediģēšanu</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- HISTORY -->
-  <section id="section-history" class="page-section">
-    <div class="card">
-      <div class="topbar">
-        <h2 style="margin:0;">Ieraksti izvēlētajā mēnesī</h2>
-        <button id="clearAll" class="danger">Dzēst visus datus</button>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Datums</th>
-              <th>Tips</th>
-              <th>Apraksts</th>
-              <th class="right">Summa</th>
-              <th class="right">Attiecināms</th>
-              <th>Atkārtojas</th>
-              <th>Dokuments</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="historyBody"></tbody>
-        </table>
-      </div>
-
-      <div id="historyEmpty" class="empty">Šajā mēnesī vēl nav ierakstu.</div>
-    </div>
-  </section>
-
-  <div class="card">
-    <h2>Ceturkšņa nodokļu rezerve</h2>
-
-    <div class="grid">
-      <div>
-        <div class="summary-label">VSAOI par izvēlēto ceturksni</div>
-        <div id="quarterVsao" class="summary-value">0,00 €</div>
-        <div class="summary-note">summa no šajā lietotnē ievadītajiem datiem</div>
-      </div>
-
-      <div>
-        <div class="summary-label">Kopējā nodokļu rezerve ceturksnim</div>
-        <div id="quarterReserve" class="summary-value">0,00 €</div>
-        <div class="summary-note">VSAOI + orientējošā IIN rezerve</div>
-      </div>
-    </div>
-
-    <div class="field" style="margin-top:18px;">
-      <label for="alreadyReserved">Cik jau esi atlicis nodokļiem (€)</label>
-      <input id="alreadyReserved" type="number" min="0" step="0.01" value="0">
-      <div class="hint">Ja naudu turi atsevišķā nodokļu kontā/apakškontā, ievadi šeit šī ceturkšņa rezervi.</div>
-    </div>
-
-    <div class="notice" style="margin-top:12px;">
+  </div><div class="card">
+<h2>Ceturkšņa nodokļu rezerve</h2>
+<div class="grid">
+<div>
+<div class="summary-label">VSAOI par izvēlēto ceturksni</div>
+<div class="summary-value" id="quarterVsao">0,00 €</div>
+<div class="summary-note">summa no šajā lietotnē ievadītajiem datiem</div>
+</div>
+<div>
+<div class="summary-label">Kopējā nodokļu rezerve ceturksnim</div>
+<div class="summary-value" id="quarterReserve">0,00 €</div>
+<div class="summary-note">VSAOI + orientējošā IIN rezerve</div>
+</div>
+</div>
+<div class="field" style="margin-top:18px;">
+<label for="alreadyReserved">Cik jau esi atlicis nodokļiem (€)</label>
+<input id="alreadyReserved" min="0" step="0.01" type="number" value="0"/>
+<div class="hint">Ja naudu turi atsevišķā nodokļu kontā/apakškontā, ievadi šeit šī ceturkšņa rezervi.</div>
+</div>
+<div class="notice" style="margin-top:12px;">
       Vēl ieteicams atlikt: <strong id="reserveShortfall">0,00 €</strong>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Termiņi</h2>
-
-    <div class="grid">
-      <div>
-        <div class="summary-label">Nākamais pašnodarbinātā ziņojums</div>
-        <div id="nextReportDate" style="font-size:22px;font-weight:800;"></div>
-        <div id="nextReportText" class="smalltext"></div>
-      </div>
-
-      <div>
-        <div class="summary-label">Nākamā VSAOI samaksa</div>
-        <div id="nextPaymentDate" style="font-size:22px;font-weight:800;"></div>
-        <div id="nextPaymentText" class="smalltext"></div>
-      </div>
-    </div>
-
-    <div class="rule-box">
-      <strong>Regulārie termiņi:</strong>
+</div>
+</div><div class="card">
+<h2>Termiņi</h2>
+<div class="grid">
+<div>
+<div class="summary-label">Nākamais pašnodarbinātā ziņojums</div>
+<div id="nextReportDate" style="font-size:22px;font-weight:800;"></div>
+<div class="smalltext" id="nextReportText"></div>
+</div>
+<div>
+<div class="summary-label">Nākamā VSAOI samaksa</div>
+<div id="nextPaymentDate" style="font-size:22px;font-weight:800;"></div>
+<div class="smalltext" id="nextPaymentText"></div>
+</div>
+</div>
+<div class="rule-box">
+<strong>Regulārie termiņi:</strong>
       pašnodarbinātā ziņojums līdz 17. janvārim, 17. aprīlim, 17. jūlijam un 17. oktobrim;
       VSAOI samaksa līdz attiecīgā mēneša 23. datumam.
       Gada ienākumu deklarācija saimnieciskās darbības veicējam parasti jāiesniedz no 1. marta līdz 1. jūnijam, un aprēķinātais IIN jāsamaksā līdz 23. jūnijam.
       Ja gada ienākumi pārsniedz 105 300 €, termiņi ir vēlāk.
     </div>
-  </div>
-
-  <div class="card">
-    <h2>Gada nodokļu orientieris</h2>
-    <div class="grid">
-      <div>
-        <div class="summary-label">Aptuvenais IIN uzkrājums ievadītajiem gada datiem</div>
-        <div id="yearIin" class="summary-value">0,00 €</div>
-      </div>
-      <div class="smalltext">
+</div><div class="card">
+<h2>Gada nodokļu orientieris</h2>
+<div class="grid">
+<div>
+<div class="summary-label">Aptuvenais IIN uzkrājums ievadītajiem gada datiem</div>
+<div class="summary-value" id="yearIin">0,00 €</div>
+</div>
+<div class="smalltext">
         Šis rādītājs summē šajā aplikācijā ievadīto gada peļņu un VSAOI. Gala IIN jānosaka gada deklarācijā EDS, īpaši ja ir alga, citi ienākumi, apgādājamie vai citi atvieglojumi.
       </div>
+</div>
+</div></section><section class="page-section" id="section-income">
+<h1>Ieņēmumi</h1>
+<div class="subtitle">Reģistrē saņemto naudu no savas saimnieciskās darbības.</div>
+<div class="card">
+<h2>Pievienot ieņēmumu</h2>
+<div class="grid">
+<div class="field">
+<label for="incomeDate">Datums</label>
+<input id="incomeDate" type="date"/>
+</div>
+<div class="field">
+<label for="incomeAmount">Summa (€)</label>
+<input id="incomeAmount" min="0" placeholder="Piem., 850.00" step="0.01" type="number"/>
+</div>
+</div>
+<div class="field">
+<label for="incomeDescription">Apraksts</label>
+<input id="incomeDescription" placeholder="Piem., Mājaslapas izstrāde klientam" type="text"/>
+</div>
+<div class="edit-note hidden" id="incomeEditingNotice">
+        Tu rediģē esošu ieņēmumu. Saglabājot tas tiks aizstāts.
+      </div>
+<div class="action-row">
+<button id="addIncome">Saglabāt ieņēmumu</button>
+<button class="secondary hidden" id="cancelIncomeEdit">Atcelt rediģēšanu</button>
+</div>
+</div>
+</section><section class="page-section" id="section-expense">
+<h1>Izdevumi</h1>
+<div class="subtitle">Pievieno izdevumu, pārbaudi attiecināmo daļu un saglabā pamatojumu.</div>
+<div class="card">
+<h2>Pievienot izdevumu</h2>
+<div class="grid">
+<div class="field">
+<label for="expenseDate">Datums</label>
+<input id="expenseDate" type="date"/>
+</div>
+<div class="field">
+<label for="profession">Nozare / profesija</label>
+<select id="profession">
+<option value="it">IT / datorsistēmu tehniķis</option>
+<option value="beauty">Frizieris / skaistumkopšana</option>
+<option value="photo">Fotogrāfs / video</option>
+<option value="trades">Meistars / remontdarbi</option>
+<option value="consultant">Konsultants / freelanceris</option>
+</select>
+</div>
+<div class="field">
+<label for="category">Izdevuma kategorija</label>
+<select id="category"></select>
+</div>
+<div class="field">
+<label for="expenseAmount">Summa (€)</label>
+<input id="expenseAmount" min="0" placeholder="Piem., 120.00" step="0.01" type="number"/>
+</div>
+<div class="field">
+<label for="businessUse">Darba lietojums (%)</label>
+<input id="businessUse" max="100" min="0" step="1" type="number" value="100"/>
+</div>
+<div class="field">
+<label for="receipt">Ir čeks / rēķins?</label>
+<select id="receipt">
+<option value="yes">Jā</option>
+<option value="no">Nē</option>
+</select>
+</div>
+</div>
+<div class="field hidden" id="kmField">
+<label>Degvielas aprēķins</label>
+<div class="grid">
+<div>
+<input id="totalKm" min="0" placeholder="Kopējie km" step="1" type="number"/>
+<div class="hint">Kopējais nobraukums</div>
+</div>
+<div>
+<input id="workKm" min="0" placeholder="Darba km" step="1" type="number"/>
+<div class="hint">Darba braucieni</div>
+</div>
+</div>
+</div>
+<div class="field">
+<label for="expenseDescription">Pamatojums / apraksts</label>
+<textarea id="expenseDescription" placeholder="Piem., brauciens pie klienta, darba programmatūra, profesionālais šampūns klientiem..."></textarea>
+</div>
+<div class="grid">
+<div class="field">
+<label for="recurring">Atkārtots izdevums</label>
+<select id="recurring">
+<option value="no">Nē</option>
+<option value="monthly">Katru mēnesi</option>
+</select>
+<div class="hint">Piem., telefons, internets, programmatūra, noma.</div>
+</div>
+<div class="field">
+<label for="receiptFile">Čeka / rēķina fails</label>
+<input accept="image/*,.pdf" id="receiptFile" type="file"/>
+<div class="hint">Beta versijā fails glabājas tikai šajā pārlūkā. Ieteicams zem 700 KB.</div>
+<div class="file-preview" id="receiptPreview"></div>
+</div>
+</div>
+<div class="notice" id="categoryAdvice" style="margin-bottom:14px;"></div>
+<div class="edit-note hidden" id="editingNotice">
+        Tu rediģē esošu izdevumu. Saglabājot tas tiks aizstāts.
+      </div>
+<div class="card hidden" id="expensePreview" style="background:#f8fafc;box-shadow:none;">
+<div id="previewBadge"></div>
+<div id="previewText" style="margin-top:10px;line-height:1.5;"></div>
+<div style="margin-top:10px;">
+          Attiecināmā summa:
+          <strong id="previewDeductible"></strong>
+</div>
+</div>
+<div class="action-row">
+<button id="checkExpense">Pārbaudīt</button>
+<button class="secondary" disabled="" id="saveExpense">Saglabāt izdevumu</button>
+<button class="secondary hidden" id="cancelEdit">Atcelt rediģēšanu</button>
+</div>
+</div>
+</section><section class="page-section" id="section-history">
+<h1>Visi ieraksti</h1>
+<div class="card">
+<div class="topbar">
+<h2 style="margin:0;">Ieraksti izvēlētajā mēnesī</h2>
+<button class="danger" id="clearAll">Dzēst visus datus</button>
+</div>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Datums</th>
+<th>Tips</th>
+<th>Apraksts</th>
+<th class="right">Summa</th>
+<th class="right">Attiecināms</th>
+<th>Atkārtojas</th>
+<th>Dokuments</th>
+<th></th>
+</tr>
+</thead>
+<tbody id="historyBody"></tbody>
+</table>
+</div>
+<div class="empty" id="historyEmpty">
+        Šajā mēnesī vēl nav ierakstu.
+        <div class="action-row" style="margin-top:10px;">
+<button class="small" onclick="showSection('income')" type="button">+ Pievienot ieņēmumu</button>
+<button class="secondary small" onclick="showSection('expense')" type="button">+ Pievienot izdevumu</button>
+</div>
+</div>
+</div>
+</section><section class="page-section" id="section-backup">
+<h1>Eksports un rezerves kopija</h1>
+<div class="card">
+<div class="action-row">
+<button id="exportCsv">Eksportēt CSV</button>
+<button class="secondary" id="backupJson">Lejupielādēt rezerves kopiju</button>
+<button class="secondary" id="restoreJson">Atjaunot no rezerves kopijas</button>
+<input accept=".json,application/json" class="hidden" id="restoreFile" type="file"/>
+</div>
+<div class="hint" style="margin-top:8px;">
+      CSV der Excel. Rezerves kopija saglabā visus ieņēmumus, izdevumus, iestatījumus un pievienotos dokumentus.
     </div>
-  </div>
+</div>
+</section></div>
 
-  <div class="card smalltext">
-    <strong>Beta:</strong> dati glabājas tikai šīs pārlūkprogrammas <code>localStorage</code>. Ja notīrīsi pārlūka datus vai izmantosi citu ierīci, ieraksti tur nebūs pieejami.
-  </div>
+
+
+
+
+
+<!-- INCOME -->
+
+<!-- EXPENSE -->
+
+<!-- HISTORY -->
 
 </div>
-</div>
 
+<div class="onboarding hidden" id="onboarding">
+<div class="onboarding-card">
+<button aria-label="Aizvērt" class="modal-close" id="closeOnboarding" title="Aizvērt" type="button">×</button>
+<div class="onboarding-steps">
+<span class="step-dot active" data-step-dot="1">1. Par tevi</span>
+<span class="step-dot" data-step-dot="2">2. Darbība</span>
+<span class="step-dot" data-step-dot="3">3. Nodokļi</span>
+</div>
+<div id="onboardingStep1">
+<h2>Sāksim ar pamatiem</h2>
+<div class="field">
+<label for="profileName">Vārds vai uzņēmuma nosaukums</label>
+<input id="profileName" placeholder="Piem., Nauris / NC IT" type="text"/>
+</div>
+<div class="field">
+<label for="profileProfession">Galvenā nozare / profesija</label>
+<select id="profileProfession">
+<option value="it">IT / datorsistēmu tehniķis</option>
+<option value="beauty">Frizieris / skaistumkopšana</option>
+<option value="photo">Fotogrāfs / video</option>
+<option value="trades">Meistars / remontdarbi</option>
+<option value="consultant">Konsultants / freelanceris</option>
+<option value="other">Cits</option>
+</select>
+</div>
+<div class="field hidden" id="profileOtherWrap">
+<label for="profileOther">Apraksti savu darbību</label>
+<input id="profileOther" placeholder="Piem., tulks, treneris, dizainers" type="text"/>
+</div>
+<div class="action-row">
+<button id="onboardingNext1" type="button">Tālāk</button>
+<button class="secondary" id="onboardingLater" type="button">Pabeigt vēlāk</button>
+</div>
+</div>
+<div class="hidden" id="onboardingStep2">
+<h2>Kā tu strādā?</h2>
+<div class="field">
+<label for="profileActivityType">Darba veids</label>
+<select id="profileActivityType">
+<option value="services">Pakalpojumi</option>
+<option value="goods">Preces</option>
+<option value="mixed">Gan pakalpojumi, gan preces</option>
+</select>
+</div>
+<div class="field">
+<label for="profileWorkplace">Kur galvenokārt strādā?</label>
+<select id="profileWorkplace">
+<option value="home">No mājām</option>
+<option value="client">Pie klientiem</option>
+<option value="rented">Nomātās telpās</option>
+<option value="mixed">Dažādi</option>
+</select>
+</div>
+<div class="field">
+<label for="profileCar">Izmanto personīgo auto darbam?</label>
+<select id="profileCar">
+<option value="no">Nē</option>
+<option value="yes">Jā</option>
+</select>
+</div>
+<div class="action-row">
+<button class="secondary" id="onboardingBack2" type="button">Atpakaļ</button>
+<button id="onboardingNext2" type="button">Tālāk</button>
+</div>
+</div>
+<div class="hidden" id="onboardingStep3">
+<h2>Nodokļu iestatījumi</h2>
+<div class="field">
+<label for="profileOtherJob">Vai tev ir arī algots darbs?</label>
+<select id="profileOtherJob">
+<option value="no">Nē</option>
+<option value="yes">Jā</option>
+</select>
+<div class="hint">Tas var ietekmēt neapliekamā minimuma izmantošanu un gada IIN aprēķinu.</div>
+</div>
+<div class="field">
+<label for="profileVat">Vai esi PVN maksātājs?</label>
+<select id="profileVat">
+<option value="no">Nē</option>
+<option value="yes">Jā</option>
+</select>
+<div class="hint">PVN loģiku šī beta versija vēl nerēķina. Ja izvēlies “Jā”, rādīsim brīdinājumu.</div>
+</div>
+<div class="notice hidden" id="vatWarning" style="margin-bottom:14px;">
+        Šī beta versija vēl nav paredzēta pilnai PVN uzskaitei.
+      </div>
+<div class="action-row">
+<button class="secondary" id="onboardingBack3" type="button">Atpakaļ</button>
+<button id="finishOnboarding" type="button">Saglabāt profilu</button>
+</div>
+</div>
+</div>
+</div>
 <script>
-const STORAGE_KEY = "selfEmployedBetaV7";
+const STORAGE_KEY = "selfEmployedBetaV11";
 
 /*
 2026 nodokļu konstantes:
@@ -1542,19 +1587,27 @@ function finishProfile(){
 }
 
 function maybeStartOnboarding(){
+  showSection("dashboard");
+
   if(!data.profile || !data.profile.completed){
     openOnboarding();
-  }else{
-    renderProfileSummary();
+    return;
+  }
 
-    const p=data.profile;
-    if(p.profession && p.profession!=="other" && document.getElementById("profession").querySelector('option[value="'+p.profession+'"]')){
-      document.getElementById("profession").value=p.profession;
-    }
+  renderProfileSummary();
 
-    if(p.otherJob==="yes"){
-      document.getElementById("useMinimum").value="no";
-    }
+  const p=data.profile;
+
+  if(
+    p.profession &&
+    p.profession!=="other" &&
+    document.getElementById("profession")?.querySelector('option[value="'+p.profession+'"]')
+  ){
+    document.getElementById("profession").value=p.profession;
+  }
+
+  if(p.otherJob==="yes"){
+    document.getElementById("useMinimum").value="no";
   }
 }
 
@@ -1710,20 +1763,29 @@ function renderAll(){
 }
 
 function showSection(name){
+  const target=document.getElementById("section-"+name);
+
+  if(!target){
+    console.warn("Section not found:",name);
+    return;
+  }
+
   document.querySelectorAll(".page-section").forEach(section=>{
     section.classList.remove("active");
   });
 
-  const target=document.getElementById("section-"+name);
-  if(target) target.classList.add("active");
+  target.classList.add("active");
 
   document.querySelectorAll(".nav-btn").forEach(btn=>{
     btn.classList.toggle("active",btn.dataset.section===name);
   });
 
-  if(window.innerWidth<=850){
-    document.getElementById("sidebar").classList.remove("open");
+  const sidebar=document.getElementById("sidebar");
+  if(sidebar && window.innerWidth<=850){
+    sidebar.classList.remove("open");
   }
+
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 
 document.querySelectorAll(".nav-btn").forEach(btn=>{
@@ -1774,34 +1836,45 @@ document.getElementById("restoreFile").addEventListener("change",async(e)=>{
   e.target.value="";
 });
 
-document.getElementById("editProfile").addEventListener("click",()=>openOnboarding(true));
-document.getElementById("profileProfession").addEventListener("change",updateOtherProfessionVisibility);
-document.getElementById("profileVat").addEventListener("change",updateVatWarning);
-document.getElementById("closeOnboarding").addEventListener("click",closeOnboarding);
+document.getElementById("editProfile")?.addEventListener("click",()=>openOnboarding(true));
+document.getElementById("profileProfession")?.addEventListener("change",updateOtherProfessionVisibility);
+document.getElementById("profileVat")?.addEventListener("change",updateVatWarning);
+document.getElementById("closeOnboarding")?.addEventListener("click",closeOnboarding);
+document.getElementById("onboardingLater")?.addEventListener("click",closeOnboarding);
 
-document.getElementById("onboardingNext1").addEventListener("click",(e)=>{
+document.getElementById("onboardingNext1")?.addEventListener("click",(e)=>{
   e.preventDefault();
   showOnboardingStep(2);
 });
-document.getElementById("onboardingBack2").addEventListener("click",(e)=>{
+
+document.getElementById("onboardingBack2")?.addEventListener("click",(e)=>{
   e.preventDefault();
   showOnboardingStep(1);
 });
-document.getElementById("onboardingNext2").addEventListener("click",(e)=>{
+
+document.getElementById("onboardingNext2")?.addEventListener("click",(e)=>{
   e.preventDefault();
   showOnboardingStep(3);
 });
-document.getElementById("onboardingBack3").addEventListener("click",(e)=>{
+
+document.getElementById("onboardingBack3")?.addEventListener("click",(e)=>{
   e.preventDefault();
   showOnboardingStep(2);
 });
-document.getElementById("finishOnboarding").addEventListener("click",(e)=>{
+
+document.getElementById("finishOnboarding")?.addEventListener("click",(e)=>{
   e.preventDefault();
   finishProfile();
 });
 
-document.getElementById("onboarding").addEventListener("click",(e)=>{
+document.getElementById("onboarding")?.addEventListener("click",(e)=>{
   if(e.target.id==="onboarding") closeOnboarding();
+});
+
+document.addEventListener("keydown",(e)=>{
+  if(e.key==="Escape"){
+    closeOnboarding();
+  }
 });
 
 document.getElementById("monthFilter").addEventListener("change",()=>{
@@ -1841,104 +1914,5 @@ renderProfileSummary();
 renderAll();
 maybeStartOnboarding();
 </script>
-
-<div id="onboarding" class="onboarding hidden">
-  <div class="onboarding-card">
-    <button id="closeOnboarding" class="modal-close" title="Aizvērt">×</button>
-    <div class="onboarding-steps">
-      <span class="step-dot active" data-step-dot="1">1. Par tevi</span>
-      <span class="step-dot" data-step-dot="2">2. Darbība</span>
-      <span class="step-dot" data-step-dot="3">3. Nodokļi</span>
-    </div>
-
-    <div id="onboardingStep1">
-      <h2>Sāksim ar pamatiem</h2>
-      <div class="field">
-        <label for="profileName">Vārds vai uzņēmuma nosaukums</label>
-        <input id="profileName" type="text" placeholder="Piem., Nauris / NC IT">
-      </div>
-      <div class="field">
-        <label for="profileProfession">Galvenā nozare / profesija</label>
-        <select id="profileProfession">
-          <option value="it">IT / datorsistēmu tehniķis</option>
-          <option value="beauty">Frizieris / skaistumkopšana</option>
-          <option value="photo">Fotogrāfs / video</option>
-          <option value="trades">Meistars / remontdarbi</option>
-          <option value="consultant">Konsultants / freelanceris</option>
-          <option value="other">Cits</option>
-        </select>
-      </div>
-      <div class="field hidden" id="profileOtherWrap">
-        <label for="profileOther">Apraksti savu darbību</label>
-        <input id="profileOther" type="text" placeholder="Piem., tulks, treneris, dizainers">
-      </div>
-      <div class="action-row">
-        <button id="onboardingNext1" type="button">Tālāk</button>
-      </div>
-    </div>
-
-    <div id="onboardingStep2" class="hidden">
-      <h2>Kā tu strādā?</h2>
-      <div class="field">
-        <label for="profileActivityType">Darba veids</label>
-        <select id="profileActivityType">
-          <option value="services">Pakalpojumi</option>
-          <option value="goods">Preces</option>
-          <option value="mixed">Gan pakalpojumi, gan preces</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="profileWorkplace">Kur galvenokārt strādā?</label>
-        <select id="profileWorkplace">
-          <option value="home">No mājām</option>
-          <option value="client">Pie klientiem</option>
-          <option value="rented">Nomātās telpās</option>
-          <option value="mixed">Dažādi</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="profileCar">Izmanto personīgo auto darbam?</label>
-        <select id="profileCar">
-          <option value="no">Nē</option>
-          <option value="yes">Jā</option>
-        </select>
-      </div>
-      <div class="action-row">
-        <button id="onboardingBack2" type="button" class="secondary">Atpakaļ</button>
-        <button id="onboardingNext2" type="button">Tālāk</button>
-      </div>
-    </div>
-
-    <div id="onboardingStep3" class="hidden">
-      <h2>Nodokļu iestatījumi</h2>
-      <div class="field">
-        <label for="profileOtherJob">Vai tev ir arī algots darbs?</label>
-        <select id="profileOtherJob">
-          <option value="no">Nē</option>
-          <option value="yes">Jā</option>
-        </select>
-        <div class="hint">Tas var ietekmēt neapliekamā minimuma izmantošanu un gada IIN aprēķinu.</div>
-      </div>
-      <div class="field">
-        <label for="profileVat">Vai esi PVN maksātājs?</label>
-        <select id="profileVat">
-          <option value="no">Nē</option>
-          <option value="yes">Jā</option>
-        </select>
-        <div class="hint">PVN loģiku šī beta versija vēl nerēķina. Ja izvēlies “Jā”, rādīsim brīdinājumu.</div>
-      </div>
-
-      <div id="vatWarning" class="notice hidden" style="margin-bottom:14px;">
-        Šī beta versija vēl nav paredzēta pilnai PVN uzskaitei.
-      </div>
-
-      <div class="action-row">
-        <button id="onboardingBack3" type="button" class="secondary">Atpakaļ</button>
-        <button id="finishOnboarding" type="button">Saglabāt profilu</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
